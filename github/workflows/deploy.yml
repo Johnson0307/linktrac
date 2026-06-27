@@ -1,0 +1,22 @@
+name: Deploy LINK PRIME
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependências do Backend
+        run: cd backend && npm ci
+
+      - name: Instalar dependências e gerar build do Frontend
+        run: cd frontend && npm ci && npm run build
