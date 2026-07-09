@@ -1,4 +1,4 @@
-name: Deploy LINK PRIME
+name: Deploy LINKTRAC PRIME
 on:
   push:
     branches: [main]

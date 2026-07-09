@@ -1,4 +1,4 @@
-# LINK PRIME
+# LINKTRAC PRIME
 
 ## Rastreamento Veicular
 
@@ -9,7 +9,7 @@ Sistema completo para cadastro, monitoramento e consulta de localização de ve�
 - **Backend:** Node.js, Express, MongoDB, Mongoose
 - **Frontend:** React, Vite, Axios, React Router DOM
 - **Banco de Dados:** MongoDB Atlas
-- **Estilo:** Identidade visual LINK PRIME
+- **Estilo:** Identidade visual LINKTRAC PRIME
 
 ### 🎨 Paleta de Cores
 
