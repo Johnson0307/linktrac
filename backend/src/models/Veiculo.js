@@ -4,9 +4,13 @@ const veiculoSchema = new mongoose.Schema({
   placa: {
     type: String,
     required: true,
-    unique: true,
     uppercase: true,
     trim: true,
+  },
+  clienteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Cliente',
+    required: true,
   },
   marca: { type: String, required: true },
   modelo: { type: String, required: true },
@@ -17,5 +21,7 @@ const veiculoSchema = new mongoose.Schema({
   ativo: { type: Boolean, default: true },
   dataCadastro: { type: Date, default: Date.now },
 });
+
+veiculoSchema.index({ clienteId: 1, placa: 1 }, { unique: true });
 
 module.exports = mongoose.model('Veiculo', veiculoSchema);

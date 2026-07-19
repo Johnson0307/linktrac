@@ -18,4 +18,6 @@ const localizacaoSchema = new mongoose.Schema({
   dataHora: { type: Date, default: Date.now },
 });
 
+localizacaoSchema.index({ veiculoId: 1, dataHora: -1 });
+
 module.exports = mongoose.model('Localizacao', localizacaoSchema);

@@ -1,18 +1,35 @@
 import { useState, useEffect } from 'react';
+import { cadastrarVeiculo, listarTodos } from '../api/veiculos';
 
 const Veiculos = () => {
   const [veiculos, setVeiculos] = useState([]);
   const [form, setForm] = useState({
     placa: '',
-    modelo: '',
     marca: '',
+    modelo: '',
     ano: '',
-    tipo: '',
-    hodometroAtual: '',
-    numeroRastreador: '',
-    temCanBus: false,
-    sensores: [],
+    cor: '',
+    nomeCliente: '',
+    telefone: '',
+    ativo: true,
   });
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
+  const [mensagem, setMensagem] = useState('');
+
+  useEffect(() => {
+    const carregarVeiculos = async () => {
+      try {
+        const resposta = await listarTodos();
+        setVeiculos(resposta.dados || []);
+      } catch (err) {
+        console.error('Erro ao carregar veículos:', err);
+        setErro('Não foi possível carregar os veículos.');
+      }
+    };
+
+    carregarVeiculos();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,29 +39,38 @@ const Veiculos = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Veículo cadastrado:', form);
-    // Aqui depois envia para a API
-    setVeiculos((prev) => [...prev, { ...form, id: Date.now() }]);
-    setForm({
-      placa: '',
-      modelo: '',
-      marca: '',
-      ano: '',
-      tipo: '',
-      hodometroAtual: '',
-      numeroRastreador: '',
-      temCanBus: false,
-      sensores: [],
-    });
+    setErro('');
+    setMensagem('');
+    setCarregando(true);
+
+    try {
+      const resposta = await cadastrarVeiculo(form);
+      const novoVeiculo = resposta.dados;
+      setVeiculos((prev) => [novoVeiculo, ...prev]);
+      setMensagem('Veículo cadastrado com sucesso.');
+      setForm({
+        placa: '',
+        marca: '',
+        modelo: '',
+        ano: '',
+        cor: '',
+        nomeCliente: '',
+        telefone: '',
+        ativo: true,
+      });
+    } catch (err) {
+      setErro(err?.mensagem || (err?.erros ? err.erros.join(' ') : 'Erro ao cadastrar veículo.'));
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       <h2 style={{ color: '#1E293B', marginBottom: '1.5rem' }}>Gestão de Veículos</h2>
 
-      {/* Formulário de Cadastro */}
       <div
         style={{
           background: '#F8FAFC',
@@ -62,12 +88,14 @@ const Veiculos = () => {
             gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           }}
         >
+          {erro && <p style={{ color: '#DC2626' }}>{erro}</p>}
+          {mensagem && <p style={{ color: '#16A34A' }}>{mensagem}</p>}
           <input
             type="text"
             name="placa"
             placeholder="Placa"
             value={form.placa}
-            onChange={handleChange}
+            onChange={(e) => setForm((prev) => ({ ...prev, placa: e.target.value.toUpperCase() }))}
             required
             style={inputStyle}
           />
@@ -100,47 +128,40 @@ const Veiculos = () => {
           />
           <input
             type="text"
-            name="tipo"
-            placeholder="Tipo (Caminhão, Van, etc)"
-            value={form.tipo}
-            onChange={handleChange}
-            style={inputStyle}
-          />
-          <input
-            type="number"
-            name="hodometroAtual"
-            placeholder="Quilometragem Inicial"
-            value={form.hodometroAtual}
+            name="cor"
+            placeholder="Cor"
+            value={form.cor}
             onChange={handleChange}
             style={inputStyle}
           />
           <input
             type="text"
-            name="numeroRastreador"
-            placeholder="ID do Rastreador"
-            value={form.numeroRastreador}
+            name="nomeCliente"
+            placeholder="Nome do cliente"
+            value={form.nomeCliente}
+            onChange={handleChange}
+            required
+            style={inputStyle}
+          />
+          <input
+            type="tel"
+            name="telefone"
+            placeholder="Telefone"
+            value={form.telefone}
             onChange={handleChange}
             style={inputStyle}
           />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} />
+            Ativo
+          </label>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <input
-              type="checkbox"
-              name="temCanBus"
-              checked={form.temCanBus}
-              onChange={handleChange}
-              id="canbus"
-            />
-            <label htmlFor="canbus">Possui leitura CAN Bus</label>
-          </div>
-
-          <button type="submit" style={buttonStyle}>
-            Cadastrar Veículo
+          <button type="submit" style={buttonStyle} disabled={carregando}>
+            {carregando ? 'Cadastrando...' : 'Cadastrar Veículo'}
           </button>
         </form>
       </div>
 
-      {/* Lista de Veículos */}
       <div>
         <h3 style={{ marginBottom: '1rem', color: '#334155' }}>Veículos Cadastrados</h3>
         {veiculos.length === 0 ? (
@@ -149,7 +170,7 @@ const Veiculos = () => {
           <div style={{ display: 'grid', gap: '1rem' }}>
             {veiculos.map((v) => (
               <div
-                key={v.id}
+                key={v._id || v.id || v.placa}
                 style={{
                   padding: '1rem',
                   background: '#FFFFFF',
@@ -159,10 +180,16 @@ const Veiculos = () => {
               >
                 <strong>{v.placa}</strong> — {v.marca} {v.modelo} ({v.ano})
                 <br />
-                Quilometragem: {v.hodometroAtual} km | Rastreador: {v.numeroRastreador}
-                {v.temCanBus && (
-                  <span style={{ marginLeft: '1rem', color: '#0099FF' }}> • CAN Bus ativo</span>
+                Cliente: {v.nomeCliente || 'Não informado'}
+                <br />
+                {v.telefone && (
+                  <>
+                    Telefone: {v.telefone} <br />
+                  </>
                 )}
+                <span style={{ color: v.ativo ? '#047857' : '#B91C1C' }}>
+                  {v.ativo ? 'Ativo' : 'Inativo'}
+                </span>
               </div>
             ))}
           </div>

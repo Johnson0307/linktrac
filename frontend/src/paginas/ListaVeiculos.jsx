@@ -7,10 +7,10 @@ export default function ListaVeiculos() {
   useEffect(() => {
     const carregar = async () => {
       try {
-        const { data } = await listarTodos();
-        setVeiculos(data);
+        const resposta = await listarTodos();
+        setVeiculos(resposta.dados || []);
       } catch (err) {
-        console.error('Erro ao carregar veículos:', err);
+        setVeiculos([]);
       }
     };
     carregar();

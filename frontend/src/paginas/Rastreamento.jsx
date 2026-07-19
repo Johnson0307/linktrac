@@ -1,28 +1,53 @@
 import { useState } from 'react';
+import { obterUltimaPosicao } from '../api/rastreamento';
 
 const Rastreamento = () => {
   const [placa, setPlaca] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [resultado, setResultado] = useState(null);
+  const [erro, setErro] = useState('');
 
-  const consultarVeiculo = async () => {
-    if (!placa.trim()) return alert('Digite a placa do veículo');
+  const consultarVeiculo = async (event) => {
+    event?.preventDefault?.();
+    const placaTrim = placa.trim();
+    if (!placaTrim) {
+      setErro('Digite a placa do veículo.');
+      setResultado(null);
+      return;
+    }
+
     setCarregando(true);
+    setErro('');
+    setResultado(null);
 
-    // Aqui depois você conecta com sua API/MongoDB
-    console.log('Buscando dados para placa:', placa.toUpperCase());
-
-    // Simulação de busca
-    setTimeout(() => {
+    try {
+      const { dados } = await obterUltimaPosicao(placaTrim);
+      setResultado(dados);
+    } catch (fetchError) {
+      setErro(
+        fetchError?.mensagem ||
+          fetchError?.response?.data?.mensagem ||
+          'Não foi possível consultar a posição.'
+      );
+    } finally {
       setCarregando(false);
-      alert('Consulta realizada! Em breve conectamos com seu banco.');
-    }, 800);
+    }
   };
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
       <h2 style={{ color: '#1E293B', marginBottom: '1.5rem' }}>Rastreamento de Veículos</h2>
 
-      <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', marginBottom: '2rem' }}>
+      <form
+        onSubmit={consultarVeiculo}
+        style={{
+          display: 'flex',
+          gap: '0.8rem',
+          alignItems: 'center',
+          marginBottom: '2rem',
+          flexWrap: 'wrap',
+        }}
+      >
         <input
           type="text"
           placeholder="Digite a placa (ex: ABC1234)"
@@ -37,7 +62,7 @@ const Rastreamento = () => {
           }}
         />
         <button
-          onClick={consultarVeiculo}
+          type="submit"
           disabled={carregando}
           style={{
             padding: '0.7rem 1.4rem',
@@ -52,19 +77,53 @@ const Rastreamento = () => {
         >
           {carregando ? 'Buscando...' : 'Consultar'}
         </button>
-      </div>
+      </form>
 
       <div
         style={{
           padding: '2rem',
           backgroundColor: '#F8FAFC',
           borderRadius: '8px',
-          textAlign: 'center',
         }}
       >
-        <p style={{ color: '#64748B', fontSize: '1.1rem' }}>
-          Informe a placa para visualizar a localização em tempo real
-        </p>
+        {erro && <p style={{ color: '#DC2626', marginBottom: '1rem' }}>{erro}</p>}
+
+        {!resultado && !erro && (
+          <p style={{ color: '#64748B', fontSize: '1.1rem' }}>
+            Informe a placa para visualizar a localização em tempo real.
+          </p>
+        )}
+
+        {resultado && (
+          <div style={{ color: '#1E293B', lineHeight: '1.7' }}>
+            <h3 style={{ marginBottom: '1rem' }}>Última posição registrada</h3>
+            <p>
+              <strong>Placa:</strong> {resultado.veiculo.placa}
+            </p>
+            <p>
+              <strong>Veículo:</strong> {resultado.veiculo.marca} {resultado.veiculo.modelo}
+            </p>
+            <p>
+              <strong>Cliente:</strong> {resultado.veiculo.cliente}
+            </p>
+            <p>
+              <strong>Latitude / Longitude:</strong> {resultado.localizacao.coordenadas}
+            </p>
+            <p>
+              <strong>Endereço:</strong> {resultado.localizacao.endereco || 'Não disponível'}
+            </p>
+            <p>
+              <strong>Velocidade:</strong> {resultado.localizacao.velocidade} km/h
+            </p>
+            <p>
+              <strong>Status:</strong> {resultado.localizacao.status}
+            </p>
+            <p>
+              <strong>Registrado em:</strong>{' '}
+              {new Date(resultado.localizacao.dataHora).toLocaleString('pt-BR')}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

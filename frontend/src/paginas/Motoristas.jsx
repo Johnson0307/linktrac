@@ -21,7 +21,6 @@ export default function Motorista() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Motorista cadastrado:', form);
     setMotoristas((prev) => [...prev, { ...form, id: Date.now() }]);
     setForm({
       nome: '',

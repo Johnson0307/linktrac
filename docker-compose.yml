@@ -1,76 +1,42 @@
-version: '3.8'
-
 services:
-  gateway:
-    build: ./gateway
-    ports: ['${GATEWAY_PORT}:3000']
-    depends_on: [auth, tracking, fleet, alert, report]
-    env_file: .env
-    networks:
-      - linktrac-net
-
-  auth:
-    build: ./auth-service
-    env_file: .env
-    depends_on: [postgres, redis]
-    networks:
-      - linktrac-net
-
-  tracking:
-    build: ./tracking-service
-    env_file: .env
-    depends_on: [postgres, redis]
-    networks:
-      - linktrac-net
-
-  fleet:
-    build: ./fleet-service
-    env_file: .env
-    depends_on: [postgres]
-    networks:
-      - linktrac-net
-
-  alert:
-    build: ./alert-service
-    env_file: .env
-    depends_on: [tracking, redis]
-    networks:
-      - linktrac-net
-
-  report:
-    build: ./report-service
-    env_file: .env
-    depends_on: [tracking, postgres]
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/linktrac-db
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - mongo
     networks:
       - linktrac-net
 
   frontend:
-    build: ./frontend
-    ports: ['${FRONTEND_PORT}:80']
-    depends_on: [gateway]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://backend:5000/api
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
     networks:
       - linktrac-net
 
-  postgres:
-    image: postgres:15-alpine
+  mongo:
+    image: mongo:6.0
+    restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASS}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports: ['${POSTGRES_PORT}:5432']
-    networks:
-      - linktrac-net
-
-  redis:
-    image: redis:7-alpine
-    ports: ['6379:6379']
+      - mongo-data:/data/db
     networks:
       - linktrac-net
 
 volumes:
-  postgres-data:
+  mongo-data:
 
 networks:
   linktrac-net:

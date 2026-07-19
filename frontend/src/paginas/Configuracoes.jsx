@@ -20,7 +20,6 @@ export default function Configuracoes() {
 
   const salvar = () => {
     alert('Configurações salvas com sucesso!');
-    console.log('Configurações:', config);
   };
 
   return (
