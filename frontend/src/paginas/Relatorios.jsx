@@ -1,62 +1,12 @@
-import { useState } from 'react';
-
-export default function Relatorios() {
-  const [periodo, setPeriodo] = useState('mes');
-
-  return (
-    <div style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <h2 style={{ color: '#1E293B', marginBottom: '1.5rem' }}>Relatórios e Indicadores</h2>
-      <p style={{ color: '#64748B', marginBottom: '2rem' }}>
-        Dados consolidados de desempenho, consumo e segurança.
-      </p>
-
-      <div style={{ marginBottom: '2rem' }}>
-        <label style={{ marginRight: '1rem', fontWeight: 500 }}>Período:</label>
-        <select
-          value={periodo}
-          onChange={(e) => setPeriodo(e.target.value)}
-          style={{ padding: '0.5rem 1rem', border: '1px solid #CBD5E1', borderRadius: '4px' }}
-        >
-          <option value="dia">Último dia</option>
-          <option value="semana">Última semana</option>
-          <option value="mes">Último mês</option>
-          <option value="ano">Último ano</option>
-        </select>
-      </div>
-
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.5rem',
-        }}
-      >
-        <div style={cardStyle}>
-          <h4 style={tituloCard}>Quilometragem Total</h4>
-          <p style={valorCard}>24.850 km</p>
-        </div>
-        <div style={cardStyle}>
-          <h4 style={tituloCard}>Combustível Consumido</h4>
-          <p style={valorCard}>3.120 L</p>
-        </div>
-        <div style={cardStyle}>
-          <h4 style={tituloCard}>Custo por km</h4>
-          <p style={valorCard}>R$ 1,82</p>
-        </div>
-        <div style={cardStyle}>
-          <h4 style={tituloCard}>Viagens Realizadas</h4>
-          <p style={valorCard}>142</p>
-        </div>
-      </div>
-    </div>
-  );
+import {useEffect,useState} from 'react';
+import {useAuth} from '../contexts/AuthContext';
+import api from '../api/api';
+import RelatorioTrajeto from './RelatorioTrajeto';
+const local=v=>new Date(v.getTime()-v.getTimezoneOffset()*60000).toISOString().slice(0,16);
+export default function Relatorios(){const {user}=useAuth();const gestor=['admin','gestor'].includes(user?.role);const [veiculos,setVeiculos]=useState([]),[campos,setCampos]=useState([]),[veiculoId,setVeiculoId]=useState(''),[inicio,setInicio]=useState(local(new Date(new Date().setHours(0,0,0,0)))),[fim,setFim]=useState(local(new Date())),[colunas,setColunas]=useState(['dataHora','velocidade','ignicao','telemetria.odometroKm']),[resultado,setResultado]=useState(null),[consulta,setConsulta]=useState(null),[erro,setErro]=useState(''),[ocupado,setOcupado]=useState(false),[incluirSemGPS,setIncluirSemGPS]=useState(true);
+ useEffect(()=>{if(!gestor)return;let ativo=true;Promise.all([api.get('/operacao/opcoes'),api.get('/relatorios/campos')]).then(([v,c])=>{if(ativo){setVeiculos(v.data.veiculos);setVeiculoId(v.data.veiculos[0]?._id||'');setCampos(c.data.dados)}}).catch(e=>{if(ativo)setErro(e.response?.data?.mensagem||'Não foi possível preparar o relatório.')});return()=>{ativo=false}},[gestor,user?.clienteId]);
+ const consultar=async e=>{e.preventDefault();setErro('');setOcupado(true);setResultado(null);try{const filtros={veiculoId,inicio:new Date(inicio).toISOString(),fim:new Date(fim).toISOString(),colunas,incluirSemGPS};const r=await api.post('/relatorios/consultar',filtros);setResultado(r.data);setConsulta(filtros)}catch(e){setErro(e.response?.data?.mensagem||'Não foi possível gerar o relatório. Confira as datas.')}finally{setOcupado(false)}};
+ const exportar=async()=>{setOcupado(true);setErro('');try{const r=await api.post('/relatorios/csv',consulta,{responseType:'blob'});const url=URL.createObjectURL(new Blob([r.data],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='linktrac-telemetria.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch{setErro('Não foi possível exportar o relatório.')}finally{setOcupado(false)}};
+ if(!gestor)return <div><p>Administradores e gestores podem consultar e exportar dados da empresa. Para sua consulta de veículo, utilize Rastreamento e Históricos.</p></div>;
+ return <div><form className="central-card" onSubmit={consultar}><div className="central-form"><label>Veículo<select aria-label="Veículo do relatório" required value={veiculoId} onChange={e=>setVeiculoId(e.target.value)}><option value="">Selecione</option>{veiculos.map(v=><option key={v._id} value={v._id}>{v.placa} — {v.marca} {v.modelo}</option>)}</select></label><label>Início<input aria-label="Início do relatório" required type="datetime-local" value={inicio} onChange={e=>setInicio(e.target.value)}/></label><label>Fim<input aria-label="Fim do relatório" required type="datetime-local" value={fim} onChange={e=>setFim(e.target.value)}/></label></div><label style={{display:'block',marginTop:20}}><input type="checkbox" checked={incluirSemGPS} onChange={e=>setIncluirSemGPS(e.target.checked)}/> Incluir leituras de sensores sem GPS</label><h3 style={{marginTop:24}}>Colunas do relatório</h3><div style={{display:'flex',flexWrap:'wrap',gap:16}}>{campos.map(c=><label key={c.key}><input type="checkbox" checked={colunas.includes(c.key)} onChange={e=>setColunas(s=>e.target.checked?[...s,c.key]:s.filter(k=>k!==c.key))}/> {c.label}</label>)}</div><p>Horários no fuso do dispositivo. Até 366 dias e 2.000 posições por consulta. Exportação CSV usa a mesma seleção da última consulta gerada.</p><button disabled={ocupado||!colunas.length} type="submit">{ocupado?'Processando...':'Gerar relatório'}</button>{resultado&&<button style={{marginLeft:12}} disabled={ocupado} type="button" onClick={exportar}>Exportar CSV</button>}</form><RelatorioTrajeto veiculoId={veiculoId} inicio={inicio} fim={fim} />{erro&&<p role="alert">{erro}</p>}{resultado&&<section className="central-card"><h3>Resultado da última consulta</h3><p>{resultado.quantidade} posições.{resultado.limitado?' Consulta parcial: reduza o período para consultar os demais registros.':''}</p>{!resultado.dados.length?<p>Nenhum dado recebido neste período. Não é necessário cadastrar posições fictícias.</p>:<><p>Até 100 linhas são apresentadas abaixo. O CSV inclui todas as linhas retornadas, respeitando o limite da consulta.</p><table><thead><tr>{resultado.colunas.map(c=><th key={c.key}>{c.label}</th>)}</tr></thead><tbody>{resultado.dados.slice(0,100).map((row,i)=><tr key={i}>{resultado.colunas.map(c=><td key={c.key}>{row[c.key]===null?'—':Array.isArray(row[c.key])?row[c.key].map(item=>item&&typeof item==='object'?JSON.stringify(item):item).join(', '):typeof row[c.key]==='boolean'?(row[c.key]?'Sim':'Não'):String(row[c.key])}</td>)}</tr>)}</tbody></table></>}</section>}</div>;
 }
-
-const cardStyle = {
-  background: '#FFFFFF',
-  padding: '1.5rem',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-};
-const tituloCard = { margin: '0 0 0.8rem 0', color: '#64748B', fontSize: '1rem' };
-const valorCard = { margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#1E293B' };

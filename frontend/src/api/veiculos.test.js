@@ -1,6 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import api from './api';
-import { listarTodos, cadastrarVeiculo, buscarPorPlaca } from './veiculos';
 
 vi.mock('./api', () => ({
   default: {
@@ -8,6 +6,9 @@ vi.mock('./api', () => ({
     post: vi.fn(),
   },
 }));
+
+import api from './api';
+import { listarTodos, cadastrarVeiculo, buscarPorPlaca } from './veiculos';
 
 describe('veiculos api', () => {
   it('listarTodos retorna os dados do servidor', async () => {

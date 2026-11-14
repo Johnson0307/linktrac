@@ -1,6 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import api from './api';
-import { login, register, me } from './auth';
 
 vi.mock('./api', () => ({
   default: {
@@ -9,6 +7,9 @@ vi.mock('./api', () => ({
   },
 }));
 
+import api from './api';
+import { login, register, me } from './auth';
+
 describe('auth api', () => {
   it('login retorna os dados do servidor', async () => {
     api.post.mockResolvedValue({ data: { dados: { token: 'abc', usuario: { nome: 'Teste' } } } });
@@ -16,7 +17,7 @@ describe('auth api', () => {
 
     expect(resposta).toEqual({ dados: { token: 'abc', usuario: { nome: 'Teste' } } });
     expect(api.post).toHaveBeenCalledWith('/auth/login', {
-      email: 'teste@example.com',
+      identificador: 'teste@example.com',
       senha: 'senha123',
     });
   });

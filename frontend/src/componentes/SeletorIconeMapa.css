@@ -1,0 +1,27 @@
+.seletor-icone-mapa {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid #d9e4ed;
+  border-radius: 8px;
+  background: #fff;
+}
+.seletor-icone-previa {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #eaf3ff;
+}
+.icone-mapa { width: 1.4em; height: 1.4em; display: inline-block; vertical-align: middle; object-fit: contain; }
+.seletor-icone-previa .icone-mapa { font-size: 25px; }
+.seletor-icone-mapa select { display: block; width: 100%; margin-top: 4px; }
+.seletor-icone-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 9px; }
+.seletor-icone-acoes a, .seletor-icone-acoes .seletor-icone-upload { color: #17419b; text-decoration: underline; cursor: pointer; font-size: .9rem; }
+.seletor-icone-acoes .seletor-icone-upload { position: relative; display: inline-block; }
+.seletor-icone-upload input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.seletor-icone-upload:focus-within { outline: 2px solid #17419b; outline-offset: 3px; }

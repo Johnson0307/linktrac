@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { permite } from '../ajuda/acessos';
 import { buscarCliente } from '../api/clientes';
 import { criarUsuario, listarUsuarios } from '../api/usuarios';
 
@@ -9,6 +10,7 @@ const rolesDisponiveis = [
   { value: 'operador', label: 'Operador' },
   { value: 'motorista', label: 'Motorista' },
 ];
+const formInicial = { nome: '', email: '', documentoLogin: '', senha: '', role: 'operador' };
 
 export default function Usuarios() {
   const { user } = useAuth();
@@ -17,13 +19,13 @@ export default function Usuarios() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [carregando, setCarregando] = useState(false);
-  const [form, setForm] = useState({ nome: '', email: '', senha: '', role: 'operador' });
+  const [form, setForm] = useState(formInicial);
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const [clienteResposta, usuariosResposta] = await Promise.all([buscarCliente(), listarUsuarios()]);
-        setCliente(clienteResposta.dados);
+        const [clienteResposta, usuariosResposta] = await Promise.all([permite(user, 'empresa') ? buscarCliente() : Promise.resolve(null), listarUsuarios()]);
+        setCliente(clienteResposta?.dados ?? null);
         setUsuarios(usuariosResposta.dados);
       } catch (erroApi) {
         setErro(erroApi.mensagem || 'Falha ao carregar os dados.');
@@ -49,7 +51,7 @@ export default function Usuarios() {
     try {
       await criarUsuario(form);
       setSucesso('Usuário criado com sucesso.');
-      setForm({ nome: '', email: '', senha: '', role: 'operador' });
+      setForm(formInicial);
       const usuariosResposta = await listarUsuarios();
       setUsuarios(usuariosResposta.dados);
     } catch (erroApi) {
@@ -72,10 +74,6 @@ export default function Usuarios() {
     <div style={{ padding: '2rem', maxWidth: '960px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ color: '#1E293B' }}>Gestão de usuários</h2>
-          <p style={{ color: '#64748B', marginTop: '0.5rem' }}>
-            Gerencie o acesso da sua equipe aos dados da frota e ao painel.
-          </p>
           {cliente && (
             <div style={{ marginTop: '1rem', color: '#475569' }}>
               <strong>Cliente:</strong> {cliente.nome} &bull; <strong>Slug:</strong> {cliente.slug}
@@ -85,9 +83,9 @@ export default function Usuarios() {
       </div>
 
       <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
-        <section style={{ background: '#FFFFFF', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+        {erro && <p role="alert" style={{ color: '#dc2626', marginBottom: '1rem' }}>{erro}</p>}
+        {permite(user, 'usuarios', true) && <section style={{ background: '#FFFFFF', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
           <h3 style={{ marginBottom: '1rem', color: '#334155' }}>Cadastrar novo usuário</h3>
-          {erro && <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{erro}</p>}
           {sucesso && <p style={{ color: '#16a34a', marginBottom: '1rem' }}>{sucesso}</p>}
 
           <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
@@ -97,12 +95,17 @@ export default function Usuarios() {
                 <input name="nome" value={form.nome} onChange={handleChange} required style={inputStyle} />
               </label>
               <label style={labelStyle}>
-                E-mail
+                E-mail de contato
                 <input name="email" type="email" value={form.email} onChange={handleChange} required style={inputStyle} />
               </label>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <label style={labelStyle}>
+                CPF ou CNPJ para entrar
+                <input name="documentoLogin" value={form.documentoLogin} onChange={handleChange}
+                  required maxLength={32} style={inputStyle} />
+              </label>
               <label style={labelStyle}>
                 Senha
                 <input name="senha" type="password" value={form.senha} onChange={handleChange} required minLength={6} style={inputStyle} />
@@ -123,7 +126,7 @@ export default function Usuarios() {
               {carregando ? 'Salvando...' : 'Criar usuário'}
             </button>
           </form>
-        </section>
+        </section>}
 
         <section style={{ background: '#FFFFFF', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
           <h3 style={{ marginBottom: '1rem', color: '#334155' }}>Usuários do cliente</h3>

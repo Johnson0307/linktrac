@@ -4,9 +4,9 @@ const tratarErro = (erro, mensagemPadrao) => {
   return erro.response?.data || { mensagem: mensagemPadrao };
 };
 
-export const login = async (email, senha) => {
+export const login = async (identificador, senha) => {
   try {
-    const resposta = await api.post('/auth/login', { email, senha });
+    const resposta = await api.post('/auth/login', { identificador, senha });
     return resposta.data;
   } catch (erro) {
     throw tratarErro(erro, 'Falha ao efetuar login.');
@@ -27,6 +27,9 @@ export const me = async () => {
     const resposta = await api.get('/auth/me');
     return resposta.data;
   } catch (erro) {
-    throw tratarErro(erro, 'Falha ao buscar dados de usuário.');
+    throw {
+      ...tratarErro(erro, 'Falha ao buscar dados de usuário.'),
+      status: erro.response?.status,
+    };
   }
 };

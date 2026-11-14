@@ -1,4 +1,5 @@
 const Usuario = require('../models/Usuario');
+const { normalizarDocumento } = require('../services/documentoLogin');
 
 const validarUsuario = ({ nome, email, senha, role }) => {
   const erros = [];
@@ -23,17 +24,20 @@ exports.listarUsuarios = async (req, res) => {
 
     return res.json({ sucesso: true, quantidade: usuarios.length, dados: usuarios });
   } catch (err) {
-    return res.status(500).json({ sucesso: false, erro: err.message });
+    return res.status(500).json({ sucesso: false, mensagem: err.message });
   }
 };
 
 exports.criarUsuario = async (req, res) => {
   try {
-    const { nome, email, senha, role } = req.body;
+    const { nome, email, senha, role } = req.body || {};
+    const documentoLogin = normalizarDocumento(req.body?.documentoLogin);
+    if (!documentoLogin) return res.status(400).json({ sucesso: false, mensagem: 'Informe um CPF ou CNPJ válido para entrar.' });
     const payload = {
       nome,
       email: email?.toLowerCase?.().trim(),
       senha,
+      documentoLogin,
       role: role || 'operador',
       clienteId: req.user.clienteId,
     };
@@ -61,7 +65,8 @@ exports.criarUsuario = async (req, res) => {
 
     return res.status(201).json({ sucesso: true, dados: usuarioResponse });
   } catch (err) {
-    return res.status(500).json({ sucesso: false, erro: err.message });
+    if (err.code === 11000) return res.status(409).json({ sucesso: false, mensagem: 'E-mail ou CPF/CNPJ já cadastrado.' });
+    return res.status(500).json({ sucesso: false, mensagem: err.message });
   }
 };
 
@@ -100,6 +105,6 @@ exports.atualizarUsuario = async (req, res) => {
 
     return res.json({ sucesso: true, dados: usuarioResponse });
   } catch (err) {
-    return res.status(500).json({ sucesso: false, erro: err.message });
+    return res.status(500).json({ sucesso: false, mensagem: err.message });
   }
 };

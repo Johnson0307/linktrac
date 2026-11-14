@@ -8,6 +8,7 @@ export default function Register() {
   const [cnpj, setCnpj] = useState('');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [documentoLogin, setDocumentoLogin] = useState('');
   const [senha, setSenha] = useState('');
   const [registroSecret, setRegistroSecret] = useState('');
   const [erro, setErro] = useState('');
@@ -33,6 +34,7 @@ export default function Register() {
         cnpj,
         nome,
         email,
+        documentoLogin,
         senha,
         role: 'admin',
         registroSecret,
@@ -139,7 +141,26 @@ export default function Register() {
         <label
           style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', color: '#475569' }}
         >
-          E-mail
+          CPF ou CNPJ para entrar
+          <input
+            type="text"
+            value={documentoLogin}
+            onChange={(event) => setDocumentoLogin(event.target.value)}
+            maxLength={32}
+            required
+            style={{
+              padding: '0.85rem 1rem',
+              border: '1px solid #CBD5E1',
+              borderRadius: '8px',
+              fontSize: '1rem',
+            }}
+          />
+        </label>
+
+        <label
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', color: '#475569' }}
+        >
+          E-mail de contato
           <input
             type="email"
             value={email}

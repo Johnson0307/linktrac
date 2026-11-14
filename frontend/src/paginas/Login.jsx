@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useMarca } from '../contexts/MarcaContext';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [identificador, setIdentificador] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
   const { login, user, loading } = useAuth();
+  const { marca } = useMarca();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,7 +25,7 @@ export default function Login() {
     setCarregando(true);
 
     try {
-      await login(email, senha);
+      await login(identificador, senha);
       navigate(location.state?.from?.pathname || '/');
     } catch (fetchError) {
       setErro(fetchError?.mensagem || 'Não foi possível fazer login.');
@@ -43,17 +45,21 @@ export default function Login() {
         boxShadow: '0 8px 30px rgba(15, 23, 42, 0.1)',
       }}
     >
-      <h2 style={{ color: '#1E293B', marginBottom: '1rem' }}>Entrar no Linktrac Prime</h2>
+      <h2 style={{ color: '#1E293B', marginBottom: '1rem' }}>Entrar em {marca.nome}</h2>
       {erro && <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{erro}</p>}
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
         <label
           style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', color: '#475569' }}
         >
-          E-mail
+          CPF ou CNPJ
           <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            maxLength={250}
+            value={identificador}
+            onChange={(event) => setIdentificador(event.target.value)}
             required
             style={{
               padding: '0.9rem 1rem',
@@ -62,6 +68,7 @@ export default function Login() {
               fontSize: '1rem',
             }}
           />
+          <small>Se sua conta antiga usa e-mail, informe o e-mail aqui.</small>
         </label>
 
         <label
@@ -70,6 +77,7 @@ export default function Login() {
           Senha
           <input
             type="password"
+            autoComplete="current-password"
             value={senha}
             onChange={(event) => setSenha(event.target.value)}
             required

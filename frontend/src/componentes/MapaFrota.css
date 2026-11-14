@@ -1,0 +1,169 @@
+.mapa-frota {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #dce9f1;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.mapa-frota-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #17419b;
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+  padding: 12px 14px;
+}
+
+.mapa-frota-cabecalho h2 { margin: 0 0 4px; color: #fff; font-size: 1.2rem; }
+.mapa-frota-cabecalho p, .mapa-frota-rodape p, .mapa-frota-aviso { margin: 0; }
+.mapa-frota-cabecalho p, .mapa-frota-rodape, .mapa-frota-aviso { font-size: .875rem; }
+.mapa-frota-rodape, .mapa-frota-aviso { color: #476176; }
+.mapa-frota-cabecalho button { border: 1px solid #b3d4e6; border-radius: 7px; background: #f4faff; color: #16435e; padding: 9px 13px; cursor: pointer; }
+.mapa-frota-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.mapa-frota-area { height: clamp(440px, 64vh, 720px); border-radius: 0 0 8px 8px; z-index: 0; margin-top: -12px; }
+.mapa-frota--ampliado {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  margin: 0;
+  border-radius: 0;
+  overflow: auto;
+  padding: clamp(12px, 2.5vw, 24px);
+}
+.mapa-frota--ampliado .mapa-frota-area { flex: 1 0 420px; min-height: 420px; }
+.mapa-frota-legenda { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.mapa-frota-legenda .recente::before, .mapa-frota-legenda .antigo::before {
+  display: inline-block;
+  content: '';
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #145a9c;
+}
+.mapa-frota-legenda .antigo::before { background: #a03242; }
+.mapa-frota-rodape details { margin-top: 6px; }
+.mapa-frota-rodape ul { max-height: 9rem; overflow: auto; padding-left: 22px; }
+.mapa-frota-pino {
+  width: max-content;
+  max-width: 145px;
+  min-height: 25px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  border: 1px solid #fff;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 700;
+  background: #145a9c;
+  box-shadow: 0 1px 6px #172d43a0;
+}
+.mapa-frota-pino::after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 100%;
+  border: 5px solid transparent;
+  border-top-color: #145a9c;
+}
+.mapa-frota-pino > span { display: block; overflow: hidden; text-overflow: ellipsis; }
+.mapa-frota-pino .icone-mapa { margin-right: 5px; }
+.mapa-frota-referencia { background: #563b89; }
+.mapa-frota-referencia::after { border-top-color: #563b89; }
+.mapa-frota-simbolo-radar {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #805317;
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+}
+.mapa-frota-aviso-viario {
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: #fff;
+  color: #17344f;
+  box-shadow: 0 1px 5px #17344f44;
+}
+.mapa-frota-pino.antigo { background: #a03242; }
+.mapa-frota-pino.antigo::after { border-top-color: #a03242; }
+.mapa-frota-desenhando, .mapa-frota-desenhando .leaflet-interactive { cursor: crosshair; }
+.mapa-frota-area .leaflet-control { margin-top: 7px; }
+.mapa-frota-area .leaflet-control-layers-toggle { width: 30px; height: 30px; background-size: 21px; }
+.mapa-frota-ferramentas { position: relative; }
+.mapa-frota-botoes + .mapa-frota-botoes { margin-top: 7px; }
+.app-content .mapa-frota-area .mapa-frota-botoes button {
+  display: block;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: #132b43;
+  font: 700 19px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+.app-content .mapa-frota-area .mapa-frota-botoes button + button { border-top: 1px solid #dce3ea; }
+.app-content .mapa-frota-area .mapa-frota-botoes button:hover,
+.app-content .mapa-frota-area .mapa-frota-botoes button[aria-pressed="true"] { background: #dce9fc; }
+.mapa-frota-painel {
+  position: absolute;
+  left: 40px;
+  top: 0;
+  width: min(245px, 55vw);
+  padding: 10px;
+  border-radius: 6px;
+  background: #fff;
+  color: #132b43;
+  box-shadow: 0 2px 12px #182a4350;
+}
+.mapa-frota-painel p { margin: 0 0 6px; }
+.mapa-frota-painel select { width: 100%; }
+.mapa-frota-painel[data-tipo="rota"] > select { margin: 3px 0 6px; }
+.mapa-frota-painel button { margin-right: 4px; }
+.mapa-frota-rota-acoes { display: flex; flex-wrap: wrap; gap: 4px; }
+.mapa-frota-rota-acoes button { margin-top: 6px; }
+.mapa-frota-rota-pino {
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 5px #152538aa;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+.mapa-frota-rota-pino-A { background: #126744; }
+.mapa-frota-rota-pino-B { background: #9d2f3f; }
+.mapa-frota-rota-pino-passagem { background: #51408c; }
+.mapa-frota-rota-alca {
+  display: grid;
+  place-items: center;
+  border: 1px solid #2256b3;
+  border-radius: 50%;
+  background: #fff;
+  color: #2256b3;
+  font-weight: 750;
+  box-shadow: 0 1px 4px #15253855;
+}
+.mapa-frota-publicar-rota { display: grid; gap: 6px; margin-top: 8px; text-align: left; }
+.mapa-frota-publicar-rota[hidden] { display: none; }
+.mapa-frota-publicar-rota label { display: grid; gap: 2px; }
+.mapa-frota-publicar-rota input, .mapa-frota-publicar-rota select { min-width: 0; width: 100%; box-sizing: border-box; }
+.mapa-frota-publicar-rota button { padding-inline: 6px; }
+.mapa-frota-painel[data-tipo="rota"] { top: -105px; max-height: 350px; overflow-y: auto; }
+.mapa-frota-popup { max-height: 12rem; overflow: auto; }
+.mapa-frota-popup > div + div { border-top: 1px solid #dce9f1; margin-top: 8px; padding-top: 8px; }
+.mapa-frota-popup a { font-weight: 700; }

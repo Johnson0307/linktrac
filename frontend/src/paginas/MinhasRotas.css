@@ -1,0 +1,13 @@
+.rotas-atribuidas h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2rem); }
+.rotas-lista { list-style: none; padding: 0; }
+.rotas-lista p, .rota-atribuida p { margin: 4px 0; }
+.rota-atribuida { margin-top: 12px; }
+.rota-atribuida-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+.rota-atribuida-navegar {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #17419b;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 650;
+}

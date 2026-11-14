@@ -1,0 +1,43 @@
+.visao-plataforma {
+  max-width: 850px;
+  margin: 0 auto;
+  color: #1e293b;
+}
+
+.visao-plataforma-intro {
+  margin: 4px 0 18px;
+  line-height: 1.65;
+}
+
+.visao-plataforma details {
+  margin-bottom: 10px;
+  border: 1px solid #dce5ed;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.visao-plataforma summary {
+  padding: 14px 16px;
+  color: #1b465d;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.visao-plataforma summary:focus-visible {
+  outline: 2px solid #087eae;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.visao-plataforma dl,
+.visao-plataforma ul {
+  margin: 0;
+  padding: 0 16px 16px;
+  line-height: 1.55;
+}
+
+.visao-plataforma ul { padding-left: 36px; }
+.visao-plataforma li + li,
+.visao-plataforma dl > div + div { margin-top: 12px; }
+.visao-plataforma dt { font-weight: 650; }
+.visao-plataforma dd { margin: 2px 0 0; color: #345066; }

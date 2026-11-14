@@ -24,9 +24,18 @@ export const listarTodos = async () => {
 // Buscar veículo pela placa → usa a rota GET /api/veiculos/:placa
 export const buscarPorPlaca = async (placa) => {
   try {
-    const resposta = await api.get(`/veiculos/${placa.toUpperCase()}`);
+    const resposta = await api.get(`/veiculos/${encodeURIComponent(placa.trim().toUpperCase())}`);
     return resposta.data;
   } catch (erro) {
     throw erro.response?.data || { mensagem: 'Veículo não encontrado' };
+  }
+};
+
+export const atualizarVeiculo = async (id, dadosVeiculo) => {
+  try {
+    const resposta = await api.put('/veiculos/' + encodeURIComponent(id), dadosVeiculo);
+    return resposta.data;
+  } catch (erro) {
+    throw erro.response?.data || { mensagem: 'Erro ao atualizar veículo.' };
   }
 };

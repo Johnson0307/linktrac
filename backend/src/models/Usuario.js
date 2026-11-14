@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const usuarioSchema = new mongoose.Schema({
   nome: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  documentoLogin: { type: String, unique: true, sparse: true, select: false },
   senha: { type: String, required: true },
   role: { type: String, enum: ['admin', 'gestor', 'operador', 'motorista'], default: 'operador' },
   clienteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Cliente', required: true },
@@ -11,11 +12,10 @@ const usuarioSchema = new mongoose.Schema({
   dataCadastro: { type: Date, default: Date.now },
 });
 
-usuarioSchema.pre('save', async function (next) {
-  if (!this.isModified('senha')) return next();
+usuarioSchema.pre('save', async function () {
+  if (!this.isModified('senha')) return;
   const hash = await bcrypt.hash(this.senha, 10);
   this.senha = hash;
-  next();
 });
 
 usuarioSchema.methods.compararSenha = async function (senha) {
