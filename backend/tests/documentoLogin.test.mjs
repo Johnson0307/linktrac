@@ -7,7 +7,7 @@ const auth = require('../src/controllers/authController');
 const usuarios = require('../src/controllers/usuarioController');
 const clientes = require('../src/controllers/clienteController');
 
-const resposta = () => ({ status: vi.fn().mockReturnThis(), json: vi.fn() });
+const resposta = () => ({ set: vi.fn(), status: vi.fn().mockReturnThis(), json: vi.fn() });
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
 it.each([
@@ -47,4 +47,31 @@ it('recusa cadastros pela API sem documento válido', async () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ mensagem: expect.stringContaining('CPF ou CNPJ') }));
   }
+});
+
+it.each([
+  ['', false, 'inicial'],
+  ['', true, 'encerrado'],
+  ['codigo-de-teste', true, 'codigo'],
+])('informa o modo %s considerando a configuração e as contas existentes', async (codigo, temUsuarios, modo) => {
+  vi.stubEnv('REGISTER_SECRET', codigo);
+  const consultar = vi.spyOn(Usuario, 'exists').mockResolvedValue(temUsuarios ? { _id: 'id' } : null);
+  const res = resposta();
+  await auth.statusCadastro({}, res);
+  expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store');
+  expect(res.json).toHaveBeenCalledWith({ sucesso: true, dados: { modo } });
+  if (codigo) expect(consultar).not.toHaveBeenCalled();
+});
+
+it('orienta o cadastro pelo painel quando o cadastro inicial estiver encerrado', async () => {
+  vi.stubEnv('REGISTER_SECRET', '');
+  vi.stubEnv('JWT_SECRET', 'segredo-de-teste');
+  vi.spyOn(Usuario, 'exists').mockResolvedValue({ _id: 'id' });
+  const res = resposta();
+  await auth.register({ body: {
+    nomeEmpresa: 'Empresa', slug: 'empresa', nome: 'Administrador',
+    email: 'contato@example.invalid', senha: 'senha-de-teste', documentoLogin: '529.982.247-25',
+  } }, res);
+  expect(res.status).toHaveBeenCalledWith(403);
+  expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ codigo: 'CADASTRO_INICIAL_ENCERRADO' }));
 });

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMarca } from '../contexts/MarcaContext';
 import { useAuth } from '../contexts/AuthContext';
+import useCadastroInicial from '../contexts/useCadastroInicial';
 
 export default function Login() {
   const [identificador, setIdentificador] = useState('');
@@ -10,6 +11,7 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   const { login, user, loading } = useAuth();
   const { marca } = useMarca();
+  const { modo: modoCadastro } = useCadastroInicial();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -107,7 +109,9 @@ export default function Login() {
         </button>
       </form>
       <p style={{ marginTop: '1rem', color: '#475569' }}>
-        Ainda não tem conta? <Link to="/register">Cadastre-se aqui</Link>
+        {modoCadastro === 'inicial' || modoCadastro === 'codigo'
+          ? <Link to="/register">Cadastro inicial</Link>
+          : 'Precisa de acesso? Solicite seu cadastro à administração da sua empresa.'}
       </p>
     </div>
   );

@@ -4,7 +4,7 @@ const { adminDaLinktrac } = require('./linktracMiddleware');
 const { permite, regraApi } = require('../services/acessosCliente');
 const { escopoEmpresa } = require('../services/carteiraRevenda');
 
-const rotasPublicas = new Set(['/auth/login', '/auth/register', '/cliente/marca/publica', '/cliente/briefings/receber', '/documentacao']);
+const rotasPublicas = new Set(['/auth/login', '/auth/register', '/auth/register/status', '/cliente/marca/publica', '/cliente/briefings/receber', '/documentacao']);
 
 function controlarAcessos(req, res, next) {
   let caminho;

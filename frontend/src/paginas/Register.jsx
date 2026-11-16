@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import useCadastroInicial from '../contexts/useCadastroInicial';
+
+const estiloPainel = {
+  padding: '2rem',
+  maxWidth: '520px',
+  margin: '3rem auto',
+  backgroundColor: '#FFFFFF',
+  borderRadius: '12px',
+  boxShadow: '0 10px 35px rgba(15, 23, 42, 0.08)',
+};
 
 export default function Register() {
   const [nomeEmpresa, setNomeEmpresa] = useState('');
@@ -14,6 +24,7 @@ export default function Register() {
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
   const { register, user, loading } = useAuth();
+  const { modo, consultarNovamente } = useCadastroInicial();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,29 +52,41 @@ export default function Register() {
       });
       navigate('/');
     } catch (fetchError) {
+      if (fetchError?.codigo === 'CADASTRO_INICIAL_ENCERRADO') consultarNovamente();
       setErro(fetchError?.mensagem || 'Não foi possível concluir o cadastro.');
     } finally {
       setCarregando(false);
     }
   };
 
+  if (modo === 'carregando' || modo === 'indisponivel' || modo === 'encerrado') {
+    return (
+      <section style={estiloPainel}>
+        <h2>Cadastro inicial</h2>
+        {modo === 'carregando' && <p role="status">Consultando a disponibilidade do cadastro…</p>}
+        {modo === 'indisponivel' && (
+          <>
+            <p role="alert">Não foi possível consultar a disponibilidade do cadastro.</p>
+            <button type="button" onClick={consultarNovamente}>Tentar novamente</button>
+          </>
+        )}
+        {modo === 'encerrado' && (
+          <>
+            <p>A plataforma já está configurada. Entre com sua conta para continuar.</p>
+            <p>Administradores podem cadastrar empresas e seus responsáveis em <strong>Clientes → Novo cliente</strong>. Para cadastrar alguém da equipe, use <strong>Usuários</strong>.</p>
+          </>
+        )}
+        <Link to="/login">Ir para o login</Link>
+      </section>
+    );
+  }
+
   return (
-    <div
-      style={{
-        padding: '2rem',
-        maxWidth: '520px',
-        margin: '3rem auto',
-        backgroundColor: '#FFFFFF',
-        borderRadius: '12px',
-        boxShadow: '0 10px 35px rgba(15, 23, 42, 0.08)',
-      }}
-    >
+    <div style={estiloPainel}>
       <h2 style={{ color: '#0F172A', marginBottom: '1rem' }}>Cadastro de cliente e usuário</h2>
       <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
         Crie o cliente inicial e um usuário administrador para acessar o painel.
       </p>
-
-      {erro && <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{erro}</p>}
 
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
         <label
@@ -194,14 +217,16 @@ export default function Register() {
           />
         </label>
 
-        <label
+        {modo === 'codigo' && <label
           style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', color: '#475569' }}
         >
-          Código de registro (opcional)
+          Código de registro
           <input
-            type="text"
+            type="password"
+            autoComplete="off"
             value={registroSecret}
             onChange={(event) => setRegistroSecret(event.target.value)}
+            required
             style={{
               padding: '0.85rem 1rem',
               border: '1px solid #CBD5E1',
@@ -209,8 +234,9 @@ export default function Register() {
               fontSize: '1rem',
             }}
           />
-        </label>
+        </label>}
 
+        {erro && <p role="alert" style={{ color: '#dc2626', margin: 0 }}>{erro}</p>}
         <button
           type="submit"
           disabled={carregando}

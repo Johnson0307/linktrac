@@ -22,6 +22,15 @@ export const register = async (registro) => {
   }
 };
 
+export const consultarCadastroInicial = async (signal) => {
+  const resposta = await api.get('/auth/register/status', { signal });
+  const modo = resposta.data?.dados?.modo;
+  if (!['inicial', 'codigo', 'encerrado'].includes(modo)) {
+    throw new Error('Disponibilidade do cadastro indefinida.');
+  }
+  return modo;
+};
+
 export const me = async () => {
   try {
     const resposta = await api.get('/auth/me');

@@ -4,6 +4,21 @@ const Cliente = require('../models/Cliente');
 const mongoose = require('mongoose');
 const { normalizarDocumento } = require('../services/documentoLogin');
 
+const consultarModoCadastro = async (codigo) => {
+  if (codigo) return 'codigo';
+  return (await Usuario.exists({})) ? 'encerrado' : 'inicial';
+};
+
+exports.statusCadastro = async (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    const modo = await consultarModoCadastro(process.env.REGISTER_SECRET);
+    return res.json({ sucesso: true, dados: { modo } });
+  } catch {
+    return res.status(503).json({ sucesso: false, mensagem: 'Não foi possível consultar a disponibilidade do cadastro.' });
+  }
+};
+
 const criarToken = (usuario) => {
   const payload = {
     id: usuario._id,
@@ -45,14 +60,12 @@ exports.register = async (req, res) => {
       if (registroSecret !== registrationSecret) {
         return res.status(403).json({ sucesso: false, mensagem: 'Código de registro inválido.' });
       }
-    } else {
-      const totalUsers = await Usuario.countDocuments();
-      if (totalUsers > 0) {
-        return res.status(403).json({
-          sucesso: false,
-          mensagem: 'Registro não está disponível após a configuração inicial.',
-        });
-      }
+    } else if (await consultarModoCadastro(registrationSecret) === 'encerrado') {
+      return res.status(403).json({
+        sucesso: false,
+        codigo: 'CADASTRO_INICIAL_ENCERRADO',
+        mensagem: 'Entre no painel para cadastrar clientes e usuários.',
+      });
     }
 
     const existingCliente = await Cliente.findOne({ slug: slug.trim().toLowerCase() });
