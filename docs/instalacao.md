@@ -109,3 +109,33 @@ O cadastro financeiro prepara o pagador para emissão posterior. A emissão, o e
 5. Em **Central operacional → Notificações internas**, confira a ocorrência e a situação do envio. O estado “Aceito pelo WhatsApp” indica aceitação pela API. Uma resposta inconclusiva fica sinalizada para evitar reenvio automático de uma mensagem que pode já ter sido aceita.
 
 Em **Configurações → WhatsApp Business**, a administração Linktrac pode cadastrar o número comercial digitando apenas o telefone com DDD. Se a conexão ainda estiver pendente, salve o número e repita **Salvar número** após a configuração do servidor. O token precisa ter acesso à leitura do número comercial na Meta e ao envio de mensagens. A plataforma compara o telefone digitado com o número da conta conectada. Uma configuração anterior feita apenas no servidor continua operando até que um número seja salvo na tela.
+## Central de monitoramento
+
+No menu **Operação → Central de monitoramento**, consulte as ocorrências abertas, em atendimento ou encerradas. Um novo alerta de perda de alimentação abre uma ocorrência de prioridade alta para a empresa do veículo. O mapa identifica a última posição registrada, com data e hora.
+
+Administradores, gestores e operadores com permissão para configurar **Operação** podem assumir atendimentos. Quem assumiu pode registrar ações e encerrar com um desfecho obrigatório. Administradores e gestores podem acompanhar e atualizar os atendimentos da empresa.
+
+Para testar, acesse **Simular alerta**, selecione um veículo próprio e clique em **Criar ocorrência de teste**. Abra a ficha, assuma, registre uma ação e encerre. A ocorrência aparece identificada como simulação e não gera envio externo. A fila se atualiza a cada 10 segundos.
+
+O alerta **Movimento com a ignição desligada** usa três posições recentes e consecutivas do mesmo rastreador, todas com ignição explicitamente desligada. Exige dois trechos compatíveis com deslocamento e pelo menos 60 metros entre a primeira e a terceira posição. Leituras sem sinal, saltos incompatíveis e intervalos longos interrompem a sequência. O alerta abre uma ocorrência interna de prioridade alta e também pode ser escolhido em **Simular alerta**.
+
+## Chips e estoque
+
+Em **Central operacional → Chips e estoque**, cadastre o ICCID e a operadora. Vincule o chip a um equipamento ativo da própria empresa. A ficha mostra o veículo associado e o histórico guarda as movimentações com data, hora, usuário, origem e destino disponíveis.
+
+Se o equipamento mudar de veículo na mesma empresa, o chip acompanha o vínculo. Se for desativado, excluído ou transferido para outra empresa, o chip volta ao estoque da empresa de origem. Para informar a validade da garantia, use **Equipamentos e credenciais → Editar → Garantia até**.
+
+## Replay do trajeto
+
+Em **Rastreamento → Histórico e trajeto**, consulte um período e abra **Replay do trajeto**. Use **Reproduzir**, **Pausar**, os botões de ponto anterior e próximo ou a barra de posição. O marcador amarelo acompanha os pontos registrados em ordem de horário. A velocidade do replay acelera a reprodução e as lacunas superiores a cinco minutos são sinalizadas. Consultas continuam sujeitas ao limite de posições do histórico.
+
+## Prévia da cobrança mensal
+
+Em **Clientes → Financeiro e contrato**, informe o preço do rastreamento por veículo e selecione os adicionais previstos no contrato. Telemetria e telemetria completa são modalidades alternativas. Cada valor se aplica a toda a frota contabilizada deste contrato.
+
+A prévia da próxima competência usa a frota ativa na data da consulta e exclui veículos de simulação. Para uma revendedora, soma a frota própria e a dos seus clientes ativos. **Simular cobrança** calcula a proposta com os valores digitados e veículos adicionais sem gravá-los. **Salvar plano** registra os valores para as próximas consultas. O cálculo é uma estimativa, sem ciclo fechado ou emissão de cobrança.
+## Agro, talhões e horímetro
+
+Em **Operação → Agro e talhões**, delimite um talhão no mapa. Para consultar uma operação, selecione a máquina, informe um intervalo de até 24 horas e a largura do implemento em metros. A plataforma estima a faixa coberta dentro do talhão pela união de células da malha e usa posições com ignição ligada e velocidade de trabalho. Sobreposição de passagens conta uma vez por célula. O cálculo é aproximado e depende da qualidade e frequência do GPS.
+
+Em **Central operacional → Manutenção preventiva**, registre o horímetro da última revisão e o intervalo de trabalho em horas. Quando a telemetria atingir o limite, a notificação interna informa a leitura e o alvo. Ao concluir a revisão, atualize a data e o horímetro no plano. O aparelho deve enviar `telemetria.horimetroHoras` em horas.

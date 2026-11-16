@@ -14,6 +14,8 @@ import Veiculos from './paginas/Veiculos.jsx';
 import Motoristas from './paginas/Motoristas.jsx';
 import Relatorios from './paginas/Relatorios.jsx';
 import Configuracoes from './paginas/Configuracoes.jsx';
+import CentralMonitoramento from './paginas/CentralMonitoramento.jsx';
+import Talhoes from './paginas/Talhoes.jsx';
 import IdentidadeVisual from './paginas/IdentidadeVisual';
 import Login from './paginas/Login.jsx';
 import Register from './paginas/Register.jsx';
@@ -55,6 +57,8 @@ function App() {
               <Route path="/tms/cargas" element={<CentralOperacao inicial="cargas" />} />
               <Route path="/manutencao-inteligente" element={<AssistenteManutencao />} />
               <Route path="/operacao" element={<CentralOperacao />} />
+              <Route path="/monitoramento" element={<CentralMonitoramento />} />
+              <Route path="/agro" element={<Talhoes />} />
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/mapa" element={<Dashboard somenteMapa />} />

@@ -52,3 +52,19 @@ it('permite trocar o fundo e alternar o trajeto, as posições e as cercas', () 
   expect(screen.getByLabelText('Trajeto')).not.toBeChecked();
   expect(screen.getByLabelText('Cercas virtuais')).toBeChecked();
 });
+
+it('move e remove o marcador de replay sem recriar o mapa', () => {
+  L.Browser.svg = true;
+  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800);
+  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(380);
+  const posicoes = [{ latitude: -15.79, longitude: -47.88 }, { latitude: -15.78, longitude: -47.87 }];
+  const { container, rerender } = render(<MapaTrajeto posicoes={posicoes} posicaoReplay={posicoes[0]} />);
+  const marcador = container.querySelector('.marcador-replay');
+  expect(marcador).toBeTruthy();
+  const caminho = marcador.getAttribute('d');
+  rerender(<MapaTrajeto posicoes={posicoes} posicaoReplay={posicoes[1]} />);
+  expect(container.querySelector('.marcador-replay')).toBe(marcador);
+  expect(marcador.getAttribute('d')).not.toBe(caminho);
+  rerender(<MapaTrajeto posicoes={posicoes} posicaoReplay={null} />);
+  expect(container.querySelector('.marcador-replay')).toBeNull();
+});

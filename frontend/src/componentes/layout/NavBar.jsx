@@ -8,6 +8,7 @@ import { permiteRota } from '../../ajuda/acessos';
 import './NavBar.css';
 const itens = [
  ['/', 'Visão geral', 'painel', 'Operação'], ['/mapa','Mapa geral','mapa','Operação'], ['/rastreamento','Rastreamento','mapa','Operação'],
+ ['/monitoramento','Central de monitoramento','painel','Operação'], ['/agro','Agro e talhões','mapa','Operação'],
  ['/historicos','Históricos','historico','Operação'], ['/veiculos','Veículos','veiculo','Cadastros'],
  ['/motoristas','Motoristas','pessoas','Cadastros'], ['/manutencao','Manutenção','ferramenta','Gestão'],
  ['/relatorios','Relatórios','relatorio','Relatórios'],

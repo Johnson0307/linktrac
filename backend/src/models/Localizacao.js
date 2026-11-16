@@ -11,6 +11,7 @@ const localizacaoSchema = new mongoose.Schema({
   endereco: { type: String },
   recebidoEm: { type: Date, default: Date.now },
   mensagemId: { type: String, maxlength: 100 },
+  dispositivoId: { type: mongoose.Schema.Types.ObjectId, select: false },
   motoristaId: mongoose.Schema.Types.ObjectId,
   telemetria: { type: mongoose.Schema.Types.Mixed },
   ignicao: { type: Boolean, default: null },
@@ -25,6 +26,8 @@ const localizacaoSchema = new mongoose.Schema({
 });
 
 localizacaoSchema.index({ veiculoId: 1, dataHora: -1 });
+localizacaoSchema.index({ veiculoId: 1, dispositivoId: 1, dataHora: -1, _id: -1 },
+  { partialFilterExpression: { dispositivoId: { $exists: true } } });
 localizacaoSchema.index({ veiculoId: 1, mensagemId: 1 }, { unique: true, partialFilterExpression: { mensagemId: { $type: 'string' } } });
 
 module.exports = mongoose.model('Localizacao', localizacaoSchema);

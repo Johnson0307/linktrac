@@ -4,8 +4,9 @@ const { eventosTelemetria } = require('./telemetria');
 const Motorista = require('../models/Motorista');
 const Localizacao = require('../models/Localizacao');
 const Manutencao = require('../models/Manutencao');
-const { prepararEntregas, processarAvisosExternos, configuracaoDeEnvio } = require('./avisosExternos');
+const { prepararEntregas, processarAvisosExternos, configuracaoDeEnvio, tipoAlertaAlimentacao } = require('./avisosExternos');
 const { obterBase, eventosViarios } = require('./fiscalizacao');
+const { detectarMovimentoSemIgnicao, tipoMovimentoSemIgnicao, maxIntervaloMs } = require('./movimentoSemIgnicao');
 const calendario = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' });
 const identificar = async (veiculo, dataHora, telemetria) => {
   if (telemetria?.identificadorMotorista) {
@@ -23,11 +24,29 @@ const notificar = async (clienteId, chave, dados, veiculo, session) => {
   const entregasExternas = prepararEntregas(clienteId, dados, undefined, config, veiculo);
   await Notificacao.updateOne({ clienteId, chave }, { $setOnInsert: {
     ...dados, clienteId, chave, ...(entregasExternas ? { entregasExternas } : {}),
+    ...([tipoAlertaAlimentacao, tipoMovimentoSemIgnicao].includes(dados.tipo) ? { ocorrencia: { estado: 'aberta', prioridade: dados.simulado ? 2 : 1,
+      revisao: 0, historico: [{ tipo: 'aberta', em: new Date(), nome: 'Sistema' }] } } : {}),
   } }, { upsert: true, ...(session ? { session } : {}) });
 };
+async function avaliarMovimentoSemIgnicao(veiculo, posicao) {
+  if (!posicao.dispositivoId || posicao.ignicao !== false || posicao.velocidade < 7 || veiculo.ativo === false ||
+      posicao.fonte === 'simulado' || Math.abs(Date.now() - +new Date(posicao.dataHora)) > 300000) return;
+  const dataHora = new Date(posicao.dataHora);
+  const anteriores = await Localizacao.find({
+    veiculoId: veiculo._id, dispositivoId: posicao.dispositivoId, fonte: 'dispositivo',
+    dataHora: { $lt: dataHora, $gte: new Date(+dataHora - 3 * maxIntervaloMs) },
+  }).select('latitude longitude velocidade dataHora ignicao status').sort({ dataHora: -1, _id: -1 }).limit(3).lean();
+  const distancia = detectarMovimentoSemIgnicao([...anteriores.reverse(), posicao]);
+  if (distancia) await notificar(veiculo.clienteId, `posicao:${posicao._id}:${tipoMovimentoSemIgnicao}`, {
+    veiculoId: veiculo._id, tipo: tipoMovimentoSemIgnicao, ocorridoEm: dataHora,
+    mensagem: `Veículo ${veiculo.placa} se deslocou cerca de ${distancia} m com a ignição reportada como desligada.`,
+  });
+}
+
 const processarPosicao = async (veiculo, posicao) => {
   const anterior = await Localizacao.findOne({ veiculoId: veiculo._id, _id: { $ne: posicao._id } }).sort({ dataHora: -1, _id: -1 }).lean();
   if (Date.now() - new Date(posicao.dataHora) > 5 * 60000 || (anterior && new Date(anterior.dataHora) >= new Date(posicao.dataHora))) return;
+  await avaliarMovimentoSemIgnicao(veiculo, posicao);
   const config = await obterConfig(veiculo.clienteId);
   const cercas = await Registro.find({ clienteId: veiculo.clienteId, tipo: 'cercas', 'dados.veiculoId': String(veiculo._id), 'dados.ativo': true }).lean();
   const eventos = eventosTelemetria(posicao, anterior, config, cercas.map((c) => ({ ...c.dados, id: String(c._id) })));
@@ -69,11 +88,29 @@ const avaliarPlanos = async (clienteId) => {
     const servico = await Manutencao.findOne({ clienteId: plano.clienteId, veiculoId: d.veiculoId, servico: d.servico }).sort({ dataServico: -1 }).lean();
     const ultimaData = servico && new Date(servico.dataServico) > new Date(d.ultimaData) ? new Date(servico.dataServico).toISOString().slice(0, 10) : d.ultimaData;
     const ultimoOdometro = servico && new Date(servico.dataServico) >= new Date(d.ultimaData) ? servico.quilometragem : d.ultimoOdometro;
-    const [gps, amostra] = await Promise.all([Localizacao.findOne({ veiculoId: d.veiculoId, 'telemetria.odometroKm': { $exists: true } }).sort({ dataHora: -1 }).lean(), Amostra.findOne({ veiculoId: d.veiculoId, 'telemetria.odometroKm': { $exists: true } }).sort({ dataHora: -1 }).lean()]);
-    const p = amostra && (!gps || new Date(amostra.dataHora) > new Date(gps.dataHora)) ? amostra : gps;
+    const ultimaLeitura = async (campo, corte) => {
+      const filtro = { veiculoId: d.veiculoId, [`telemetria.${campo}`]: { $type: 'number' },
+        ...(corte ? { dataHora: { $gte: corte } } : {}) };
+      const [gps, amostra] = await Promise.all([
+        Localizacao.findOne(filtro).sort({ dataHora: -1, _id: -1 }).lean(),
+        Amostra.findOne({ ...filtro, clienteId: plano.clienteId }).sort({ dataHora: -1, _id: -1 }).lean(),
+      ]);
+      return amostra && (!gps || +new Date(amostra.dataHora) > +new Date(gps.dataHora)) ? amostra : gps;
+    };
+    const [p, leituraHoras] = await Promise.all([
+      d.intervaloKm && ultimaLeitura('odometroKm'),
+      d.intervaloHoras && ultimaLeitura('horimetroHoras', new Date(`${d.ultimaData}T00:00:00-03:00`)),
+    ]);
     const porData = d.intervaloDias && Date.now() >= Date.parse(ultimaData) + d.intervaloDias * 86400000;
     const porKm = d.intervaloKm && p?.telemetria?.odometroKm >= ultimoOdometro + d.intervaloKm;
-    if (porData || porKm) await notificar(plano.clienteId, `plano:${plano._id}:${ultimaData}:${ultimoOdometro}:${d.intervaloKm || 0}:${d.intervaloDias || 0}`, { veiculoId: d.veiculoId, tipo: 'manutencao', mensagem: `Revisão pendente: ${d.servico}. Critério: ${[porData ? 'prazo' : '', porKm ? 'odômetro' : ''].filter(Boolean).join(' e ')}.`, simulado: p?.fonte === 'simulado' });
+    if (porData || porKm) await notificar(plano.clienteId, `plano:${plano._id}:${ultimaData}:${ultimoOdometro}:${d.intervaloKm || 0}:${d.intervaloDias || 0}`, { veiculoId: d.veiculoId, tipo: 'manutencao', mensagem: `Revisão pendente: ${d.servico}. Critério: ${[porData ? 'prazo' : '', porKm ? 'odômetro' : ''].filter(Boolean).join(' e ')}.`, simulado: p?.fonte === 'simulado' || leituraHoras?.fonte === 'simulado' });
+    const alvoHoras = d.ultimoHorimetro + d.intervaloHoras;
+    if (d.intervaloHoras && leituraHoras?.telemetria?.horimetroHoras >= alvoHoras) {
+      await notificar(plano.clienteId, `plano-horas:${plano._id}:${d.ultimaData}:${alvoHoras}`, {
+        veiculoId: d.veiculoId, tipo: 'manutencao', simulado: leituraHoras.fonte === 'simulado',
+        mensagem: `Revisão pendente: ${d.servico}. Horímetro em ${leituraHoras.telemetria.horimetroHoras} h. Limite da revisão: ${alvoHoras} h.`,
+      });
+    }
   }
 };
 const avaliarComunicacao = async () => {

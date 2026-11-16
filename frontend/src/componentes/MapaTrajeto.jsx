@@ -6,8 +6,10 @@ const semCercas = [];
 const coordenadaValida = (p) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude) &&
   Math.abs(p.latitude) <= 90 && Math.abs(p.longitude) <= 180;
 
-export default function MapaTrajeto({ posicoes, geometria, cercas = semCercas, modo = 'trajeto' }) {
+export default function MapaTrajeto({ posicoes, geometria, cercas = semCercas, modo = 'trajeto', posicaoReplay = null }) {
   const container = useRef(null);
+  const mapaAtivo = useRef(null);
+  const marcadorReplay = useRef(null);
   const camadasEscolhidas = useRef({ fundo: 'Ruas', visiveis: {} });
   const [erroMapa, setErroMapa] = useState(false);
   useEffect(() => {
@@ -15,6 +17,7 @@ export default function MapaTrajeto({ posicoes, geometria, cercas = semCercas, m
     if (!container.current || !pontos.length) return undefined;
     setErroMapa(false);
     const mapa = L.map(container.current, { scrollWheelZoom: true });
+    mapaAtivo.current = mapa;
     const { fundos, sobreposicoes } = criarCamadasMapa();
     const marcadores = L.layerGroup();
     const nomeMarcadores = { posicao: 'Veículo', rota: 'Paradas', trajeto: 'Posições registradas' }[modo];
@@ -54,8 +57,31 @@ export default function MapaTrajeto({ posicoes, geometria, cercas = semCercas, m
     adicionarControleCamadas(mapa, fundos, sobreposicoes);
     const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => mapa.invalidateSize()) : null;
     observer?.observe(container.current);
-    return () => { observer?.disconnect(); mapa.remove(); };
+    return () => {
+      observer?.disconnect();
+      mapa.remove();
+      mapaAtivo.current = null;
+      marcadorReplay.current = null;
+    };
   }, [posicoes, geometria, cercas, modo]);
+  useEffect(() => {
+    const mapa = mapaAtivo.current;
+    if (!mapa) return;
+    if (!posicaoReplay || !coordenadaValida(posicaoReplay)) {
+      marcadorReplay.current?.remove();
+      marcadorReplay.current = null;
+      return;
+    }
+    const coordenadas = [posicaoReplay.latitude, posicaoReplay.longitude];
+    if (!marcadorReplay.current) {
+      marcadorReplay.current = L.circleMarker(coordenadas, {
+        radius: 9, color: '#312E81', weight: 3, fillColor: '#FBBF24', fillOpacity: 1, interactive: false,
+        className: 'marcador-replay',
+      }).addTo(mapa);
+    }
+    marcadorReplay.current.setLatLng(coordenadas).bringToFront();
+    mapa.panInside(coordenadas, { animate: false, padding: [24, 24] });
+  }, [posicaoReplay, posicoes, geometria, cercas, modo]);
   return <>
     {erroMapa && <p role="alert">O fundo do mapa não carregou. As posições continuam disponíveis na tabela.</p>}
     <div ref={container} role="region" aria-label={modo === 'posicao' ? 'Mapa da última posição' : 'Mapa do trajeto'} style={{ height: modo === 'posicao' ? 300 : 380, width: '100%', position: 'relative', zIndex: 0, borderRadius: 8 }} />

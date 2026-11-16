@@ -7,7 +7,7 @@ export const permite = (user, modulo, alterar = false) => {
 export const areasCentrais = ['operacao', 'equipamentos', 'video', 'manutencao', 'entregas', 'relatorios'];
 
 export const moduloDaArea = area => ({
-  dispositivos: 'equipamentos', 'historico-equipamentos': 'equipamentos', gateways: 'equipamentos',
+  dispositivos: 'equipamentos', chips: 'equipamentos', 'historico-equipamentos': 'equipamentos', gateways: 'equipamentos',
   'video-eventos': 'video', planos: 'manutencao', cargas: 'entregas', sequencia: 'entregas',
   financeiro: 'relatorios', comportamento: 'relatorios', conferencia: 'relatorios',
 })[area] || 'operacao';
@@ -15,6 +15,8 @@ export const moduloDaArea = area => ({
 export function permiteRota(user, pathname) {
   if (pathname === '/clientes' && user?.podeGerenciarCarteira) return true;
   if (pathname === '/operacao') return areasCentrais.some(modulo => permite(user, modulo));
+  if (pathname === '/monitoramento') return ['admin', 'gestor', 'operador'].includes(user?.role) && permite(user, 'operacao');
+  if (pathname === '/agro') return ['admin', 'gestor'].includes(user?.role) && permite(user, 'operacao');
   if (pathname === '/historicos') return ['rastreamento', 'manutencao', 'usuarios'].some(modulo => permite(user, modulo));
   if (pathname === '/marca') return permite(user, 'marca', true);
   const modulo = {

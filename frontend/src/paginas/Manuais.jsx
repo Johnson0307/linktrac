@@ -14,10 +14,14 @@ export default function Manuais() {
     if (id === 'revendedoras') return user?.podeGerenciarEspelhamentos || user?.podeGerenciarCarteira;
     if (id === 'clientes' && user?.podeGerenciarCarteira) return true;
     if (id === 'briefings' || id === 'espelhamentos') return user?.podeGerenciarEspelhamentos;
+    if (id === 'whatsapp' || id === 'arquivoHistorico') return user?.podeGerenciarEspelhamentos;
+    if (id === 'cobranca') return user?.role === 'admin' && (user.podeGerenciarEspelhamentos || user.podeGerenciarCarteira);
+    if (id === 'agro') return gestao && permite(user, 'operacao');
+    if (id === 'monitoramento') return (gestao || user?.role === 'operador') && permite(user, 'operacao');
     if (id === 'clientes' || id === 'integracoesCliente') {
       return user?.role === 'admin' && user.podeGerenciarEspelhamentos && permite(user, 'empresa', true);
     }
-    if (id === 'equipamentos') return gestao && permite(user, 'equipamentos');
+    if (id === 'equipamentos' || id === 'chips') return gestao && permite(user, 'equipamentos');
     if (id === 'videotelemetria') return gestao && permite(user, 'video');
     if (id === 'multas') return gestao && permite(user, 'operacao');
     if (id === 'fiscalizacao') return permite(user, 'rastreamento');

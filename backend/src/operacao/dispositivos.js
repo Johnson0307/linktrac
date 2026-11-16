@@ -5,7 +5,8 @@ const Cliente = require('../models/Cliente');
 const Veiculo = require('../models/Veiculo');
 const { adminDaLinktrac } = require('../middlewares/linktracMiddleware');
 const { Dispositivo } = require('./modelos');
-const { id } = require('./validacao');
+const { id, data } = require('./validacao');
+const { atualizarVinculoDeEquipamento } = require('./chips');
 const { consultarTac } = require('./baseTac');
 const { Configuracao, padroes } = require('./configuracao');
 const { estadoComunicacao } = require('./saudeDispositivo');
@@ -20,6 +21,7 @@ const vinculoSchema = new mongoose.Schema({
   fabricante: String,
   modelo: String,
   codigoExterno: String,
+  garantiaAte: String,
 }, { _id: false });
 
 const eventoSchema = new mongoose.Schema({
@@ -71,6 +73,7 @@ const instantaneo = (d, { cliente, veiculo }) => ({
   fabricante: d.fabricante,
   modelo: d.modelo,
   codigoExterno: d.codigoExterno,
+  garantiaAte: d.garantiaAte,
 });
 
 async function registrar(session, req, dispositivoId, tipo, origem, destino) {
@@ -91,6 +94,10 @@ function dadosCadastro(b) {
     if (b[campo] === undefined) continue;
     if (typeof b[campo] !== 'string' || b[campo].length > 100) rejeitar(400, 'Confira os dados do equipamento.');
     dados[campo] = b[campo].trim() || undefined;
+  }
+  if (b.garantiaAte !== undefined) {
+    if (b.garantiaAte !== '' && !data(b.garantiaAte)) rejeitar(400, 'Informe uma data de garantia válida.');
+    dados.garantiaAte = b.garantiaAte || undefined;
   }
   return dados;
 }
@@ -207,12 +214,14 @@ async function alterar(req, tipo) {
     }
     const origem = instantaneo(doc, await contexto(doc.clienteId, doc.veiculoId, session, false));
     if (tipo === 'exclusao') {
+      await atualizarVinculoDeEquipamento(req, doc, 'equipamento_excluido', session, origem);
       await doc.deleteOne({ session });
       await registrar(session, req, doc._id, tipo, origem);
       return {};
     }
     if (tipo === 'desativacao') {
       if (!doc.ativo) return {};
+      await atualizarVinculoDeEquipamento(req, doc, 'equipamento_desativado', session, origem);
       doc.ativo = false;
       await doc.save({ session });
       await registrar(session, req, doc._id, tipo, origem);
@@ -231,6 +240,10 @@ async function alterar(req, tipo) {
       rejeitar(409, 'O vínculo mudou. Atualize a lista antes de transferir.');
     }
     const destino = await contexto(clienteId, dados.veiculoId, session);
+    if (mudouVinculo) {
+      const destinoChip = mudouEmpresa ? undefined : instantaneo({ ...doc.toObject(), veiculoId: dados.veiculoId }, destino);
+      await atualizarVinculoDeEquipamento(req, doc, mudouEmpresa ? 'equipamento_transferido' : 'troca_veiculo', session, origem, destinoChip);
+    }
     doc.set({ ...dados, clienteId });
     if (!doc.isModified()) return {};
     const token = mudouEmpresa ? novoToken() : undefined;

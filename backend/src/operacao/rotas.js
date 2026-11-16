@@ -30,10 +30,12 @@ const referencias = async (clienteId, tipo, dados) => {
   }
 };
 router.use(authenticate);
+router.use('/ocorrencias', require('./ocorrencias'));
 router.get('/configuracoes', async (req, res) => {
   try { res.json({ sucesso: true, dados: await obterConfig(req.user.clienteId), campos }); } catch (e) { falha(res, e); }
 });
 router.use(authorize('admin', 'gestor'));
+router.use('/agro', require('./agro'));
 const configurarWhatsApp = (acao) => async (req, res) => {
   if (!adminDaLinktrac(req.user)) return res.status(403).json({ sucesso: false, mensagem: 'Acesso restrito à administração Linktrac.' });
   res.set('Cache-Control', 'private, no-store');
@@ -54,6 +56,7 @@ router.get('/arquivo-historico', async (req, res) => {
   }
 });
 router.use('/dispositivos', require('./dispositivos'));
+router.use('/chips', require('./chips').router);
 router.put('/configuracoes', async (req, res) => {
   const resultado = validarConfig(req.body);
   if (resultado.erro) return res.status(400).json({ sucesso: false, mensagem: resultado.erro });

@@ -2,13 +2,14 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import api from '../api/api';
 const CatalogoRastreadores = lazy(() => import('./CatalogoRastreadores'));
 
-const vazio = { nome: '', fabricante: '', modelo: '', codigoExterno: '', veiculoId: '' };
+const vazio = { nome: '', fabricante: '', modelo: '', codigoExterno: '', veiculoId: '', garantiaAte: '' };
 const tipos = {
   cadastro: 'Cadastro', edicao: 'Edição', transferencia: 'Transferência',
   desativacao: 'Desativação', exclusao: 'Exclusão',
 };
 const mensagemErro = (e) => e.response?.data?.mensagem || 'Não foi possível concluir a operação.';
 const dataHora = (valor) => new Date(valor).toLocaleString('pt-BR');
+const dataGarantia = valor => valor.split('-').reverse().join('/');
 const campos = [
   ['nome', 'Nome do equipamento'], ['fabricante', 'Fabricante'],
   ['modelo', 'Modelo'], ['codigoExterno', 'IMEI ou código externo Traccar'],
@@ -21,6 +22,7 @@ function Vinculo({ vinculo }) {
     {vinculo.veiculo && <> · {vinculo.veiculo}</>}
     <br />
     {[vinculo.nome, vinculo.fabricante, vinculo.modelo, vinculo.codigoExterno].filter(Boolean).join(' · ')}
+    {vinculo.garantiaAte && <><br />Garantia até {dataGarantia(vinculo.garantiaAte)}</>}
   </>;
 }
 
@@ -180,6 +182,7 @@ export default function Equipamentos({ user, somenteHistorico = false, versao, p
       ...Object.fromEntries(campos.map(([campo]) => [campo, d[campo] || ''])),
       clienteId: d.clienteId?._id,
       veiculoId: d.veiculoId?._id || '',
+      garantiaAte: d.garantiaAte || '',
     });
     setErro('');
     setMensagem('');
@@ -279,6 +282,9 @@ export default function Equipamentos({ user, somenteHistorico = false, versao, p
             {opcoes.empresas.map(c => <option key={c._id} value={c._id}>{c.nome}</option>)}
           </select>
         </label>}
+        <label>Garantia até
+          <input type="date" value={form.garantiaAte} onChange={e => setForm(v => ({ ...v, garantiaAte: e.target.value }))} />
+        </label>
         <label>Veículo
           <select required value={form.veiculoId} onChange={e => setForm(v => ({ ...v, veiculoId: e.target.value }))}>
             <option value="">Selecione</option>
@@ -286,7 +292,7 @@ export default function Equipamentos({ user, somenteHistorico = false, versao, p
           </select>
         </label>
         <div className="central-full">
-          {editando && clienteId !== editando.clienteId?._id && <p>A transferência para outro cliente gera um novo token e invalida o anterior.</p>}
+          {editando && clienteId !== editando.clienteId?._id && <p>A transferência para outro cliente gera um novo token. Se houver chip vinculado, ele volta ao estoque da empresa de origem.</p>}
           <button type="submit" disabled={!form.veiculoId}>{ocupado ? 'Processando...' : 'Salvar equipamento'}</button>
           {editando && <button type="button" onClick={limpar}>Cancelar edição</button>}
         </div>
@@ -313,7 +319,8 @@ export default function Equipamentos({ user, somenteHistorico = false, versao, p
       {!lista.length ? <p>Nenhum equipamento cadastrado.</p> : <table>
         <thead><tr><th>Equipamento</th><th>Cliente</th><th>Veículo</th><th>Comunicação</th><th>Última leitura</th><th>Ações</th></tr></thead>
         <tbody>{lista.map(d => <tr key={d._id}>
-          <td>{d.nome}{d.codigoExterno && <><br />{d.codigoExterno}</>}</td>
+          <td>{d.nome}{d.codigoExterno && <><br />{d.codigoExterno}</>}
+            {d.garantiaAte && <><br />Garantia até {dataGarantia(d.garantiaAte)}</>}</td>
           <td>{d.clienteId?.nome || '—'}</td><td>{d.veiculoId?.placa || '—'}</td>
           <td><strong>{d.estadoComunicacao || '—'}</strong>
             {d.ultimaRecepcao && <><br />{dataHora(d.ultimaRecepcao)}</>}

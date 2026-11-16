@@ -112,7 +112,7 @@ export const manuais = {
   },
   rastreamento: {
     titulo: 'Rastreamento', objetivo: 'Consultar a última posição, o trajeto, as viagens e as paradas de um veículo autorizado.',
-    uso: ['Digite a placa e clique em Consultar. Se houver placas iguais, abra o veículo pela lista em Veículos.', 'Confira a última posição no mapa da própria tela e o horário em Registrado em. Ver posição no mapa abre também o ponto no OpenStreetMap.', 'Marque Atualizar a cada intervalo indicado para renovar a última posição. Desmarque para parar.', 'Em Histórico e trajeto, informe Início e Fim ou deixe em branco para consultar até 500 posições recentes. Clique em Consultar histórico.', 'Use Limpar período para voltar à consulta sem datas. Os horários dos filtros seguem o dispositivo que você está usando.', 'Abra Camadas do mapa para alternar trajeto, pontos e cercas virtuais ativas do veículo, quando existirem. Satélite e Trânsito aparecem quando há um provedor configurado.', 'Clique nos pontos para ver data, horário e velocidade. Verde indica início e vermelho indica fim.', 'Alterne Viagens e Paradas para ver os trechos estimados, suas durações e os locais observados.'],
+    uso: ['Digite a placa e clique em Consultar. Se houver placas iguais, abra o veículo pela lista em Veículos.', 'Confira a última posição no mapa da própria tela e o horário em Registrado em. Ver posição no mapa abre também o ponto no OpenStreetMap.', 'Marque Atualizar a cada intervalo indicado para renovar a última posição. Desmarque para parar.', 'Em Histórico e trajeto, informe Início e Fim ou deixe em branco para consultar até 500 posições recentes. Clique em Consultar histórico.', 'Use Limpar período para voltar à consulta sem datas. Os horários dos filtros seguem o dispositivo que você está usando.', 'Abra Camadas do mapa para alternar trajeto, pontos e cercas virtuais ativas do veículo, quando existirem. Satélite e Trânsito aparecem quando há um provedor configurado.', 'Clique nos pontos para ver data, horário e velocidade. Verde indica início e vermelho indica fim.', 'Abra Replay do trajeto para reproduzir, pausar e avançar pelas posições registradas no mapa.', 'Alterne Viagens e Paradas para ver os trechos estimados, suas durações e os locais observados.'],
     limites: ['O histórico é atualizado pelo botão Consultar histórico, separadamente da última posição.', 'A linha do mapa liga pontos; não calcula o percurso pelas ruas. Distância e viagens são estimativas sem confirmação de ignição.', 'Lacunas acima de cinco minutos e posições sem dados suficientes não contam como movimento ou parada.', 'TESTE01 é uma simulação. Posições simuladas não descrevem o seu veículo real.'],
     empresa: { passos: ['Cadastre o veículo em Veículos antes de receber posições.', 'Verifique se as posições chegam e se a placa consultada corresponde ao cadastro correto.', 'Para integração de um rastreador real, solicite à administração a configuração compatível com o equipamento.'], observacoes: ['Cadastrar a placa não conecta o rastreador automaticamente.', 'Esta aba não oferece formulário para cadastrar posições reais ou alterar o rastreador.'] },
   },
@@ -176,6 +176,89 @@ export const manuais = {
     uso: ['Esta área é restrita a administradores e gestores. As consultas comuns continuam em Rastreamento e Históricos.'],
     limites: ['Funções físicas dependem de equipamentos compatíveis. A aba Integrações apresenta o que ainda precisa de fornecedor ou homologação.'],
     empresa: { passos: ['Escolha a área no seletor e abra o manual específico do formulário.', 'Cadastre motoristas e veículos antes de criar vínculos, planos e entregas.', 'Em Cercas virtuais, informe o centro, o raio e o veículo. Confira a vigência e salve a cerca ativa. Entradas e saídas detectadas em novas posições aparecem em Notificações internas.', 'Consulte Notificações internas, confira a ocorrência e marque como lida após analisar.'], observacoes: ['Pneus usam movimentos cronológicos e odômetro informado. A indicação de inspeção depende desses registros.'] },
+  },
+  agro: {
+    titulo: 'Agro, talhões e horímetro',
+    objetivo: 'Delimitar talhões, estimar a área trabalhada e acompanhar revisões por horas do motor.',
+    uso: [
+      'Abra Operação → Agro e talhões. Escolha uma máquina para centralizar o mapa em sua última posição, se necessário.',
+      'Clique em Novo talhão, dê um nome, clique no mapa em cada canto na ordem do contorno e salve. Use Editar talhão para corrigir o desenho.',
+      'Selecione talhão e máquina, preencha o período da operação e a largura efetiva do implemento e clique em Calcular área.',
+      'Em Central operacional → Manutenção preventiva, preencha o horímetro da última revisão e o intervalo em horas. Ao realizar a revisão, atualize a data e a leitura de referência no plano.',
+    ],
+    limites: [
+      'A área é estimada pela faixa traçada por posições com ignição ligada e velocidade de trabalho. Passagens repetidas contam uma vez por célula da malha dentro do talhão.',
+      'Use apenas o horário da operação. O GPS e a ignição não confirmam se o implemento estava acionado. Lacunas superiores a dois minutos ficam fora do cálculo.',
+      'O lembrete por horas depende de o aparelho enviar o horímetro.',
+    ],
+  },
+  monitoramento: {
+    titulo: 'Central de monitoramento',
+    objetivo: 'Atender ocorrências de perda de alimentação e movimento com ignição desligada.',
+    uso: [
+      'Abra Operação → Central de monitoramento. Alterne entre Abertas, Em atendimento e Encerradas.',
+      'Clique em Abrir ficha para conferir a placa, o horário do alerta, o responsável e a última posição disponível do veículo.',
+      'Com permissão para configurar Operação, clique em Assumir atendimento, siga o roteiro da ficha e use Registrar ação para guardar suas anotações.',
+      'Informe o resultado e clique em Encerrar ocorrência. O histórico registra o responsável, a data e as ações.',
+    ],
+    limites: ['A fila atualiza a cada 10 segundos. O mapa da ficha mostra a última posição registrada, com seu horário.',
+      'O movimento com ignição desligada exige três posições recentes do mesmo rastreador e pelo menos 60 metros de deslocamento confirmado. O rastreador precisa informar o estado da ignição.'],
+    empresa: { passos: ['Para praticar, clique em Simular alerta, selecione o tipo e o veículo e crie a ocorrência de teste. A ocorrência fica marcada como simulação e não dispara WhatsApp.'] },
+  },
+  chips: {
+    titulo: 'Chips, estoque e garantia',
+    objetivo: 'Controlar chips de rastreadores e consultar os registros de vínculo e garantia.',
+    uso: [
+      'Abra Central operacional → Chips e estoque. Use Situação para ver chips em estoque, em uso ou inativos.',
+      'Clique em Histórico na linha do chip para conferir data, usuário, origem e destino das movimentações.',
+      'Em Equipamentos e credenciais, confira a data de garantia na ficha do equipamento.',
+    ],
+    empresa: { passos: [
+      'Clique em Novo chip, informe o ICCID e a operadora e salve.',
+      'Em Vincular, selecione um equipamento ativo da própria empresa. O veículo indicado é o do equipamento.',
+      'Use Trocar equipamento para mover o chip ou Voltar ao estoque para remover o vínculo.',
+      'Para registrar a validade da garantia, abra Equipamentos e credenciais → Editar e preencha Garantia até.',
+    ], observacoes: ['O chip acompanha o equipamento em trocas de veículo na mesma empresa. Desativação, exclusão ou transferência do equipamento para outra empresa devolvem o chip ao estoque de origem.',
+      'Desativar um chip na Linktrac altera sua situação no estoque. A linha continua sob gestão da operadora.'] },
+  },
+  cobranca: {
+    titulo: 'Cadastro financeiro, contratos e prévia',
+    objetivo: 'Preparar o pagador no Asaas, preencher o contrato e estimar a próxima cobrança.',
+    uso: [
+      'Em Clientes, abra Conta de cobrança e modelo. Selecione o ambiente e conecte a conta Asaas da própria empresa.',
+      'Suba o modelo de contrato em Word (.docx). Inclua {cliente_nome}, {cliente_cpf_cnpj} e {lista_veiculos}. Os demais campos disponíveis aparecem na tela.',
+      'No cadastro de um novo cliente, marque Preparar cadastro para cobrança e contrato. Se o cliente já existir, abra Financeiro e contrato e salve os dados do pagador.',
+      'Na ficha do cliente, confira o vínculo do pagador, selecione os veículos e baixe o contrato preenchido. Revise e envie pelo canal habitual. Use Anexar contrato final para guardar o PDF.',
+      'Na Prévia da cobrança mensal, informe o preço do rastreamento e dos adicionais por veículo. Use Simular cobrança para testar os valores e veículos adicionais. Use Salvar plano para gravar os preços.',
+    ],
+    limites: [
+      'A prévia usa a frota ativa na data da consulta e exclui os veículos de simulação. Para revendedoras, inclui a frota própria e a dos clientes ativos da carteira.',
+      'Os preços do plano valem para toda a frota contabilizada no contrato. A estimativa é atualizada a cada consulta.',
+      'O vínculo com o Asaas prepara o pagador. Emissão de boletos, cobrança recorrente e conciliação de pagamentos ainda aguardam implementação.',
+    ],
+  },
+  whatsapp: {
+    titulo: 'Aviso de perda de alimentação pelo WhatsApp',
+    objetivo: 'Identificar o número comercial usado para avisar os contatos autorizados.',
+    uso: [
+      'Com a conta administrativa da Linktrac, abra Configurações → WhatsApp Business.',
+      'Digite o número comercial com DDD e clique em Salvar número. Confira se aparece Número confirmado na Meta.',
+      'Em Veículos → Editar, informe o celular do contato com DDD e marque a autorização depois de o cliente aceitar os avisos.',
+      'Em Central operacional → Notificações internas, acompanhe a situação do envio. Aceito pelo WhatsApp indica que a Meta aceitou o pedido de envio.',
+    ],
+    limites: ['O número pode ficar pendente até configurar a conta comercial e o modelo aprovado na Meta. A Central registra o alerta a partir da telemetria recebida.',
+      'O rastreador precisa conseguir informar a perda de alimentação, inclusive quando o veículo estiver sem energia. A homologação depende de teste com o aparelho.'],
+  },
+  arquivoHistorico: {
+    titulo: 'Arquivo de histórico',
+    objetivo: 'Acompanhar a cópia de posições GPS e telemetria para um segundo banco.',
+    uso: [
+      'Com a conta administrativa da Linktrac, abra Central operacional → Arquivo de histórico.',
+      'Confira a conexão, a última verificação, o registro mais antigo e o progresso da cópia.',
+      'Em caso de indisponibilidade, consulte separadamente os últimos 30 dias para acessar o período recente.',
+    ],
+    limites: ['A política planejada é de 365 dias. A rotina atual copia e verifica o histórico e preserva os dados no banco de origem.',
+      'O arquivo depende de um segundo banco configurado. Antes do uso em produção, é necessário validar a restauração de backup e a capacidade de cópia.'],
   },
   equipamentos: {
     titulo: 'Rastreadores, credenciais e histórico',
@@ -248,10 +331,12 @@ export const manuais = {
 export const secaoPorRota = {
   '/': 'painel', '/dashboard': 'painel', '/mapa': 'painel', '/minhas-rotas': 'rotasMapa', '/rastreamento': 'rastreamento', '/veiculos': 'veiculos',
   '/operacao': 'operacao', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
+  '/monitoramento': 'monitoramento', '/agro': 'agro',
   '/usuarios': 'usuarios', '/espelhamentos': 'espelhamentos', '/login': 'login', '/register': 'registro',
 };
 const moduloDeCadastro = {
-  veiculos: 'veiculos', rotasMapa: 'entregas', multas: 'operacao', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
+  veiculos: 'veiculos', rotasMapa: 'entregas', multas: 'operacao', monitoramento: 'operacao',
+  chips: 'equipamentos', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
 };
 
 export const podeVerCadastro = (user, secao) => Boolean(user && ['admin', 'gestor'].includes(user.role) &&

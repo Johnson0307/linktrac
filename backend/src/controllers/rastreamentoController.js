@@ -121,6 +121,7 @@ exports.atualizarPosicao = async (req, res) => {
     const payload = {
       ...(dataRecebida ? { dataHora: new Date(dataRecebida) } : {}),
       ...(mensagemId ? { mensagemId } : {}),
+      ...(req.dispositivo ? { dispositivoId: req.dispositivo._id } : {}),
       ...(validacao.dados ? { telemetria: validacao.dados } : {}),
       ignicao: req.body?.ignicao ?? null,
       fonte: veiculos[0].marca === 'TESTE' && veiculos[0].modelo === 'SIMULACAO' ? 'simulado' : 'dispositivo',
@@ -167,7 +168,9 @@ exports.atualizarPosicao = async (req, res) => {
       try { await require('../operacao/automacoes').processarPosicao(veiculos[0], novaPosicao.toObject ? novaPosicao.toObject() : novaPosicao); }
       catch { res.setHeader?.('X-Linktrac-Automacoes', 'indisponivel'); }
     }
-    res.status(201).json({ sucesso: true, dados: novaPosicao });
+    const dados = novaPosicao.toObject ? novaPosicao.toObject() : { ...novaPosicao };
+    delete dados.dispositivoId;
+    res.status(201).json({ sucesso: true, dados });
   } catch (err) {
     return res.status(500).json({ sucesso: false, mensagem: err.message });
   }

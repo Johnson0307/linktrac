@@ -7,6 +7,7 @@ const Cliente = require('../models/Cliente');
 const Veiculo = require('../models/Veiculo');
 const { Conta, Cadastro, validarDados, conectarAsaas, destinoDaConta, falha } = require('../services/cadastroFinanceiro');
 const { compilar, preencherContrato, tipoWord, tamanhoLimite, camposContrato } = require('../services/contratoCliente');
+const { obterPrevia, salvarPlano } = require('../services/previaCobranca');
 
 const router = express.Router();
 router.use(authenticate, authorize('admin'));
@@ -53,12 +54,24 @@ router.put('/configuracao/modelo', arquivo, tratar(async (req, res) => {
 router.param('clienteId', (req, res, next, clienteId) => tratar(async () => {
   if (!identificadorValido(clienteId) || clienteId === String(req.user.clienteId)) throw falha(404, 'Cliente da carteira não encontrado.');
   const filtro = { _id: clienteId, revendedoraId: adminDaLinktrac(req.user) ? { $exists: false } : req.user.clienteId };
-  const cliente = await Cliente.findOne(filtro).select('nome cnpj').lean();
+  const cliente = await Cliente.findOne(filtro).select('nome cnpj ativo tipo').lean();
   if (!cliente) throw falha(404, 'Cliente da carteira não encontrado.');
   req.clienteFinanceiro = cliente;
   req.filtroFinanceiro = { _id: cliente._id, emissorId: req.user.clienteId };
   next();
 })(req, res));
+
+router.get('/clientes/:clienteId/previa', tratar(async (req, res) =>
+  responder(res, await obterPrevia(req.user.clienteId, req.clienteFinanceiro))));
+router.post('/clientes/:clienteId/previa', tratar(async (req, res) => {
+  const { valores, adicionais } = req.body || {};
+  return responder(res, await obterPrevia(req.user.clienteId, req.clienteFinanceiro, { valores, adicionais }));
+}));
+
+router.put('/clientes/:clienteId/plano', tratar(async (req, res) => {
+  await salvarPlano(req.user, req.clienteFinanceiro, req.body?.valores);
+  return responder(res, await obterPrevia(req.user.clienteId, req.clienteFinanceiro));
+}));
 
 router.get('/clientes/:clienteId', tratar(async (req, res) => {
   const [conta, cadastro, veiculos] = await Promise.all([

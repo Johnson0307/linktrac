@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { obterHistorico } from '../api/rastreamento';
-import MapaTrajeto from './MapaTrajeto';
+import ReplayTrajeto from './ReplayTrajeto';
 import HistoricoAtividade from './HistoricoAtividade';
 
 export default function HistoricoRastreamento({ placa, veiculoId }) {
@@ -44,7 +44,7 @@ export default function HistoricoRastreamento({ placa, veiculoId }) {
       <HistoricoAtividade atividade={historico.atividade} limitado={historico.limitado} />
       {historico.limitado && <p role="status">Exibindo somente as 500 posições mais recentes deste período. Reduza o período para consultar os demais pontos.</p>}
       {!historico.dados.length ? <p>Nenhuma posição encontrada neste período.</p> : <>
-        <MapaTrajeto posicoes={historico.dados} cercas={historico.cercas} />
+        <ReplayTrajeto posicoes={historico.dados} cercas={historico.cercas} />
         <div style={{ overflowX: 'auto', maxHeight: 400, marginTop: '1rem' }}>
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <caption>Posições em ordem de registro, da mais antiga à mais recente</caption>

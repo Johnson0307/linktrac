@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/api';
+import PreviaCobranca from './PreviaCobranca';
 
 const endereco = [
   ['cep', 'CEP', 12], ['logradouro', 'Logradouro', 150], ['numero', 'Número', 20],
@@ -131,6 +132,7 @@ export default function FinanceiroCadastro({ cliente, voltar }) {
       </form>
     </>}
     {dados && cliente && <>
+      <PreviaCobranca caminho={caminho} />
       <section className="central-card">
         <h3>Cadastro para cobrança</h3>
         <p>{status[dados.estado] || 'Preencha os dados do pagador.'}

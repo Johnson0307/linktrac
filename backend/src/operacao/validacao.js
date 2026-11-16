@@ -31,7 +31,11 @@ const validar = (tipo, body) => {
   }
   for (const [a, b] of [['inicio', 'fim'], ['vigenciaInicio', 'vigenciaFim'], ['janelaInicio', 'janelaFim']])
     if (dados[a] && dados[b] && Date.parse(dados[a]) >= Date.parse(dados[b])) erros.push('O início deve ser anterior ao fim.');
-  if (tipo === 'planos' && !dados.intervaloKm && !dados.intervaloDias) erros.push('Informe intervalo em km ou dias.');
+  if (tipo === 'planos') {
+    if (!dados.intervaloKm && !dados.intervaloDias && !dados.intervaloHoras) erros.push('Informe intervalo em km, dias ou horas.');
+    if (dados.intervaloKm && dados.ultimoOdometro === undefined) erros.push('Informe o odômetro da última revisão.');
+    if (dados.intervaloHoras && dados.ultimoHorimetro === undefined) erros.push('Informe o horímetro da última revisão.');
+  }
   if (tipo === 'cargas' && dados.chaveNfe && !chaveValida(dados.chaveNfe)) erros.push('Chave da NF-e inválida.');
   if (tipo === 'cargas' && dados.chaveNfe && dados.codigo !== dados.chaveNfe) erros.push('Use a chave da NF-e como código da entrega.');
   if (['abastecimentos', 'cargas'].includes(tipo) && ((dados.latitude === undefined) !== (dados.longitude === undefined))) erros.push('Informe latitude e longitude juntas.');

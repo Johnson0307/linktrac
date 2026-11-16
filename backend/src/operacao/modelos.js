@@ -8,12 +8,28 @@ schema.index({ clienteId: 1, tipo: 1, 'dados.codigo': 1 }, { unique: true, parti
 const Registro = mongoose.model('RegistroOperacional', schema);
 const notificacao = new mongoose.Schema({ clienteId: { type: mongoose.Schema.Types.ObjectId, required: true }, chave: { type: String, required: true }, veiculoId: mongoose.Schema.Types.ObjectId, motoristaId: mongoose.Schema.Types.ObjectId, tipo: String, mensagem: String, simulado: Boolean, lida: { type: Boolean, default: false } }, { timestamps: true });
 notificacao.add({ entregasExternas: mongoose.Schema.Types.Mixed, ocorridoEm: Date });
+const acaoOcorrencia = new mongoose.Schema({
+  tipo: String, por: mongoose.Schema.Types.ObjectId, nome: String, em: Date, texto: String,
+}, { _id: false });
+notificacao.add({
+  ocorrencia: { type: new mongoose.Schema({
+    estado: { type: String, enum: ['aberta', 'em_atendimento', 'encerrada'] },
+    prioridade: Number,
+    responsavel: { id: mongoose.Schema.Types.ObjectId, nome: String },
+    revisao: Number,
+    historico: [acaoOcorrencia],
+  }, { _id: false }), default: undefined, select: false },
+});
+notificacao.index({ clienteId: 1, 'ocorrencia.estado': 1, 'ocorrencia.prioridade': 1, createdAt: 1, _id: 1 },
+  { partialFilterExpression: { 'ocorrencia.estado': { $exists: true } } });
 notificacao.index({ clienteId: 1, chave: 1 }, { unique: true });
 notificacao.index({ clienteId: 1, createdAt: -1 });
 const Notificacao = mongoose.model('NotificacaoOperacional', notificacao);
 const dispositivo = new mongoose.Schema({ clienteId: { type: mongoose.Schema.Types.ObjectId, required: true }, veiculoId: { type: mongoose.Schema.Types.ObjectId, required: true }, nome: { type: String, required: true }, fabricante: String, modelo: String, codigoExterno: String, protocolo: { type: String, default: 'json-linktrac-v1' }, tokenHash: { type: String, required: true, select: false }, ativo: { type: Boolean, default: true }, ultimaRecepcao: Date }, { timestamps: true });
 dispositivo.index({ clienteId: 1, veiculoId: 1 });
 dispositivo.add({
+  garantiaAte: String,
+  revisaoVinculoChip: { type: Number, select: false },
   ultimoGpsEm: Date,
   estadoAlimentacao: { type: new mongoose.Schema({ alimentada: Boolean, dataHora: Date }, { _id: false }), select: false },
   ultimaLeitura: { dataHora: Date, ignicao: Boolean, alimentacaoExterna: Boolean, tensaoBateria: Number },

@@ -55,7 +55,7 @@ function regraApi(caminho, metodo) {
   if (grupo === 'tms') return { modulos: ['entregas'], alterar: !leitura && !['rota', 'localizar'].includes(area) };
   if (grupo === 'operacao') {
     if (['opcoes', 'catalogo'].includes(area) && leitura) return { modulos: operacionais };
-    const modulos = { configuracoes: 'configuracoes', dispositivos: 'equipamentos', gateways: 'equipamentos',
+    const modulos = { configuracoes: 'configuracoes', dispositivos: 'equipamentos', chips: 'equipamentos', gateways: 'equipamentos',
       'video-eventos': 'video', planos: 'manutencao', cargas: 'entregas', sequenciar: 'entregas' };
     return { modulos: [Object.hasOwn(modulos, area) ? modulos[area] : 'operacao'], alterar: !leitura && area !== 'sequenciar' };
   }
