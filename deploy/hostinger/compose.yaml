@@ -1,0 +1,27 @@
+name: linktrac-prime
+services:
+  api:
+    build:
+      context: ../../backend
+      dockerfile: ../deploy/hostinger/api.Dockerfile
+    env_file: /etc/linktrac-prime/api.env
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+    networks:
+      - default
+      - mongodb_privado
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ../../frontend
+      dockerfile: ../deploy/hostinger/web.Dockerfile
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    restart: unless-stopped
+
+networks:
+  mongodb_privado:
+    external: true
+    name: linktrac-mongodb_privada

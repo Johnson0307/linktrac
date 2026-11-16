@@ -1,0 +1,29 @@
+name: linktrac-mongodb
+services:
+  mongo:
+    image: mongo:8.0
+    command:
+      - mongod
+      - --bind_ip_all
+      - --replSet
+      - linktrac-rs
+      - --keyFile
+      - /run/mongo-replica.key
+      - --wiredTigerCacheSizeGB
+      - "0.5"
+    env_file: /etc/linktrac-prime/mongo.env
+    mem_limit: 2g
+    volumes:
+      - dados:/data/db
+      - /etc/linktrac-prime/mongo-replica.key:/run/mongo-replica.key:ro
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/10-linktrac.js:ro
+    networks:
+      - privada
+    restart: unless-stopped
+
+volumes:
+  dados:
+
+networks:
+  privada:
+    internal: true
