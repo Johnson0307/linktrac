@@ -14,12 +14,29 @@ function escolherModelo(busca, nome) {
 it('consulta a configuração do resultado antes de preencher o cadastro', () => {
   const selecionar = vi.fn();
   render(<CatalogoRastreadores selecionar={selecionar} />);
-  fireEvent.click(screen.getByText('Buscar marca ou modelo no catálogo'));
+  fireEvent.click(screen.getByText('Biblioteca de protocolos e modelos'));
   escolherModelo('lv12', /LV12 4G USB Mini/);
   expect(screen.getByText('APN,<APN>,<USUÁRIO>,<SENHA>#')).toBeTruthy();
+  expect(screen.getByText(/gt06 · porta padrão 5023 \(protocolo a confirmar\)/)).toBeTruthy();
   expect(selecionar).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Usar este modelo' }));
   expect(selecionar).toHaveBeenCalledWith(expect.objectContaining({ modelo: 'LV12 4G USB Mini' }));
+});
+
+it('encontra o RST Mini 4G da MultiPortal por protocolo e pelos recursos de pulso e CAN', () => {
+  render(<CatalogoRastreadores />);
+  fireEvent.change(screen.getByLabelText('Protocolo Traccar'), { target: { value: 'rst' } });
+  escolherModelo('multiportal pulso rede can', /MultiPortal RST MINI 4G/);
+  expect(screen.getByText('Pulso e rede CAN')).toBeTruthy();
+  expect(screen.getByText(/rst · porta padrão 5196/)).toBeTruthy();
+});
+
+it('mostra a documentação do ST8300R com a porta de referência da família', () => {
+  render(<CatalogoRastreadores />);
+  fireEvent.change(screen.getByLabelText('Protocolo Traccar'), { target: { value: 'suntech' } });
+  escolherModelo('suntech st8300r', /ST8300R/);
+  expect(screen.getByRole('link', { name: /manual ST4305 e linha ST8300/ })).toBeTruthy();
+  expect(screen.getByText(/suntech · porta padrão 5011 \(referência da família\)/)).toBeTruthy();
 });
 
 it('mostra as referências da linha LV12 sem atribuir os comandos do USB Mini ao aparelho 4G SA', () => {

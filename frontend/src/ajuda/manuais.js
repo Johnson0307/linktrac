@@ -265,7 +265,7 @@ export const manuais = {
     objetivo: 'Cadastrar rastreadores, configurar o envio de dados e acompanhar alterações de vínculo.',
     uso: [
       'Em Cadastros → Rastreadores, consulte a última comunicação e os campos recebidos, como posição GPS, ignição e alimentação.',
-      'No cadastro, abra Buscar marca ou modelo no catálogo e selecione um resultado para ver as configurações disponíveis e os manuais do modelo.',
+      'No cadastro, abra Biblioteca de protocolos e modelos. Filtre por protocolo ou busque marca e modelo para ver as portas de referência e os manuais disponíveis.',
       'Use Histórico na linha do equipamento ou abra Histórico de equipamentos para consultar cadastros, edições, transferências, desativações e exclusões. Confira a data, o horário e as empresas e veículos envolvidos, quando informados.',
     ],
     limites: ['O histórico é preservado após a exclusão. A consulta por prefixo de IMEI pode sugerir fabricante e modelo. Confirme na etiqueta ou no manual do fabricante.', 'O recebimento exige um equipamento ou integrador configurado para o formato aceito pela Linktrac.'],

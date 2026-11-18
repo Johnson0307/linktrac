@@ -7,9 +7,24 @@ const teltonikaGPS = [
 
 const imperioMini = 'https://imperiodosrastreadores.com.br/wp-content/uploads/2025/09/LV-12-4G-USB-MINI-2025.pdf';
 const imperioTermo = 'https://imperiodosrastreadores.com.br/wp-content/uploads/2025/09/lv-12-4g-Termo-Retratil-25-26-IMPERIO-DOS-RASTREADORES.pdf';
+const suntech8300 = 'https://www.suntechdobrasil.com.br/public/media/arquivos/1764180655-manual_do_usuario_st4305_st8300_st8300r_rev24.pdf';
+const suntech8310 = 'https://www.suntechdobrasil.com.br/public/media/arquivos/1758894855-manual_do_usuario_linha_st8310u-w-r_rev4.pdf';
+const suporteSuntech = 'https://www.suntechdobrasil.com.br/suporte';
+const rstMini4g = 'https://cache.1gps.com.br/rastreadores/rst-mini-4g/manuais-pdf/manual_do_usuario_rst_mini_4g_pt.pdf';
+const rstMiniLc = 'https://cache.1gps.com.br/rastreadores/rst-mini-lc-4g/manuais-pdf/manual_do_usuario_rst_mini-lc-4g_pt.pdf';
+const rstHibrido = 'https://cache.1gps.com.br/rastreadores/rst-hibrido/manuais-pdf/especificacoes_tecnicas_rst_hibrido_pt.pdf';
+const rstObd = 'https://cache.1gps.com.br/rastreadores/rst-obd-ll/rst-obd-ll_2g/manuais-pdf/especificacoes_tecnicas_rst_obdii_pt.pdf';
 const jimiTeste = 'https://iothub.jimiiot.com/test/test.html#_2-1-device-connection';
 const jimiIntegracao = 'https://iothub.jimiiot.com/overview/getting-started.html';
 const howen = 'https://www.howentech.com/mdvr';
+
+const parametrosSuntech = [
+  ['Rede e servidor', 'Abra Parâmetros de rede no SyncTrak. Configure os dados do chip e o servidor indicado pela Linktrac para o protocolo do aparelho.'],
+  ['Envio de posições', 'Confira os intervalos para ignição ligada e desligada e os relatórios habilitados no manual da revisão.'],
+  ['Diagnóstico', 'Leia de volta a configuração e verifique a chegada de uma posição ao gateway antes de entregar o aparelho.'],
+];
+
+const redeRst = ['Rede e servidor', 'Confirme a revisão do RST, a configuração do chip e o modo de comunicação com o suporte MultiPortal. Use o IP e a porta definidos para o gateway em operação.'];
 
 const lv12 = {
   parametros: [
@@ -35,6 +50,37 @@ const jimiProprietario = [
 ];
 
 export default [
+  { fabricante: 'Suntech', modelos: ['ST4305', 'ST8300', 'ST8300R', 'ST8300H'], parametros: parametrosSuntech,
+    fontes: [['Suntech — manual ST4305 e linha ST8300', suntech8300], ['Suntech — suporte técnico', suporteSuntech]] },
+  { fabricante: 'Suntech', modelos: ['ST8310', 'ST8310U', 'ST8310W', 'ST8310R'], parametros: parametrosSuntech,
+    fontes: [['Suntech — manual ST8310U, W e R', suntech8310], ['Suntech — suporte técnico', suporteSuntech]] },
+  { fabricante: 'Suntech', modelos: ['ST8310UM'], parametros: parametrosSuntech,
+    fontes: [['Suntech — formação e suporte para ST8310UM', 'https://universt.suntechdobrasil.com.br/collections']] },
+  {
+    fabricante: 'MultiPortal', modelos: ['RST MINI 4G'], termos: 'pulso rede CAN red CAN telemetria horímetro hodômetro',
+    parametros: [
+      redeRst,
+      ['Pulso e rede CAN', 'Identifique o modo de cada entrada no configurador e no manual da revisão. Confira em bancada o envio das leituras de pulso e CAN. O recebimento depende do firmware, da configuração e dos campos encaminhados pelo gateway.'],
+    ],
+    fontes: [['MultiPortal — manual do RST Mini 4G', rstMini4g]],
+  },
+  { fabricante: 'MultiPortal', modelos: ['RST MINI LOW COST'], parametros: [redeRst],
+    fontes: [['MultiPortal — manual do RST Mini LC', rstMiniLc]] },
+  {
+    fabricante: 'MultiPortal', modelos: ['RST HIBRIDO'], termos: 'pulso rede CAN red CAN telemetria híbrido 4G',
+    parametros: [redeRst, ['Sensor de pulso e rede CAN', 'A ficha do RST Híbrido 4G lista os dois recursos. Confirme a configuração e os dados encaminhados antes de usar em operação.']],
+    fontes: [['MultiPortal — ficha técnica do RST Híbrido 4G', rstHibrido]],
+  },
+  {
+    fabricante: 'MultiPortal', modelos: ['RST OBD2'], termos: 'rede CAN red CAN telemetria OBD II OBDII',
+    parametros: [redeRst, ['Rede CAN', 'A ficha técnica indica leitura da rede CAN pelo OBD II. Confira a compatibilidade com o veículo e os campos que o gateway recebe.']],
+    fontes: [['MultiPortal — ficha técnica do RST OBD II', rstObd]],
+  },
+  {
+    fabricante: 'Império dos Rastreadores', modelos: ['LV12 4G USB Interno'],
+    parametros: [lv12.parametros[0], lv12.parametros[1], ['Servidor', 'A ficha desta variante indica configuração por SMS ou USB. Consulte o suporte da Império para obter o protocolo e os parâmetros próprios do firmware.']],
+    fontes: [['Império dos Rastreadores — LV-12 4G USB Interno', 'https://imperiodosrastreadores.com.br/lv-12-4g-2g-usb-interno/']],
+  },
   { fabricante: 'Império dos Rastreadores', modelos: ['LV12 4G', 'LV12 4G SA'], ...lv12 },
   {
     fabricante: 'Império dos Rastreadores', modelos: ['LV12 4G USB Mini'],
