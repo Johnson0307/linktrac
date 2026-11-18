@@ -9,6 +9,21 @@ vi.mock('../contexts/AuthContext', () => ({ useAuth: () => ({ user: { nome: 'Joh
 const dados = { frotaReal: 0, emMovimento: 0, veiculosComAtencao: 0, servicosRegistrados: 0, semComunicacao: 0, simulados: [{ id: 'demo', placa: 'TESTE01' }], atualizadoEm: '2026-10-27T12:00:00Z' };
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 const abrir = () => render(<MemoryRouter><Dashboard /></MemoryRouter>);
+it('abre o mapa da frota em satélite quando configurado e permite voltar para Ruas', async () => {
+  vi.stubEnv('VITE_MAP_SATELLITE_TILE_URL', 'https://example.invalid/satelite/{z}/{x}/{y}.png');
+  api.get.mockResolvedValue({ data: { dados } });
+  try {
+    abrir();
+    await screen.findByText('Nenhum veículo real cadastrado ainda');
+    expect(screen.getByRole('radio', { name: 'Satélite' }).checked).toBe(true);
+    const ruas = screen.getByRole('radio', { name: 'Ruas' });
+    fireEvent.click(ruas);
+    expect(ruas.checked).toBe(true);
+    expect(screen.getByRole('radio', { name: 'Satélite' }).checked).toBe(false);
+  } finally {
+    vi.unstubAllEnvs();
+  }
+});
 it('informa o estado vazio e mantém o veículo de teste separado', async () => {
   api.get.mockResolvedValue({ data: { dados } }); abrir();
   expect(await screen.findByText('Nenhum veículo real cadastrado ainda')).toBeTruthy();

@@ -117,7 +117,8 @@ export default function MapaFrota({ veiculos = vazios, referencias = vazios, ref
       }).bindPopup(popup);
       return { id: referencia._id, marcador };
     });
-    fundos.Ruas.addTo(mapa);
+    const fundoInicial = fundos['Satélite'] ?? fundos.Ruas;
+    fundoInicial.addTo(mapa);
     const centralizar = () => {
       if (marcadores.size) mapa.fitBounds(L.latLngBounds([...marcadores.values()].map(({ posicao }) => [posicao.latitude, posicao.longitude])), { paddingTopLeft: [62, 42], paddingBottomRight: [50, 36], maxZoom: 16 });
       else if (marcos.length) mapa.fitBounds(L.featureGroup(marcos.map(m => m.marcador)).getBounds(), { padding: [38, 38], maxZoom: 14 });
