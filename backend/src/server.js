@@ -63,6 +63,7 @@ app.get('/api/documentacao', (req, res) => res.json(require('./operacao/document
 app.get('/api/recursos', require('./middlewares/authMiddleware').authenticate, (req, res) => res.json({ sucesso: true, dados: require('./operacao/documentacao').disponibilidade }));
 require('./operacao/automacoes').iniciarWorker();
 require('./operacao/agenteMonitor').iniciarMonitor();
+require('./operacao/receptorTraccar').iniciarReceptorTraccar();
 require('./services/cadastroFinanceiro').iniciarCobranca();
 
 // Iniciar servidor

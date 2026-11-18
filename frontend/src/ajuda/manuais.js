@@ -271,6 +271,8 @@ export const manuais = {
     limites: ['O histórico é preservado após a exclusão. A consulta por prefixo de IMEI pode sugerir fabricante e modelo. Confirme na etiqueta ou no manual do fabricante.', 'O recebimento exige um equipamento ou integrador configurado para o formato aceito pela Linktrac.'],
     empresa: { passos: [
       'Selecione o veículo, informe o IMEI ou código externo e confira fabricante e modelo no catálogo. Se o modelo estiver ausente, preencha manualmente.',
+      'Para o receptor da Linktrac, marque Usar o receptor da Linktrac para este rastreador. Use um IMEI com 15 dígitos e um veículo real. O cadastro é sincronizado em até 30 segundos quando a integração do servidor está ativa.',
+      'Configure no aparelho o endereço do receptor, a APN do chip e a porta habilitada para seu protocolo. O piloto GT06 usa 5023/TCP. Outros protocolos exigem habilitação e teste da porta correspondente antes do uso.',
       'Para envio individual via API, copie a credencial ao gerar e configure o integrador com os cabeçalhos x-device-id e x-device-token.',
       'Para encaminhamento JSON do Traccar, confira o identificador externo do equipamento e crie o gateway em Gateways de protocolos. Configure o encaminhamento com x-gateway-id e x-gateway-token. Consulte a documentação em Integrações e disponibilidade.',
       'Use Editar para atualizar os dados ou o vínculo. Ao transferir para outro cliente, atualize o integrador de destino com a nova credencial, pois a anterior deixa de funcionar.',

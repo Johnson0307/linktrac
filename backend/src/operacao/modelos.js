@@ -28,6 +28,8 @@ const Notificacao = mongoose.model('NotificacaoOperacional', notificacao);
 const dispositivo = new mongoose.Schema({ clienteId: { type: mongoose.Schema.Types.ObjectId, required: true }, veiculoId: { type: mongoose.Schema.Types.ObjectId, required: true }, nome: { type: String, required: true }, fabricante: String, modelo: String, codigoExterno: String, protocolo: { type: String, default: 'json-linktrac-v1' }, tokenHash: { type: String, required: true, select: false }, ativo: { type: Boolean, default: true }, ultimaRecepcao: Date }, { timestamps: true });
 dispositivo.index({ clienteId: 1, veiculoId: 1 });
 dispositivo.add({
+  receptorTraccar: { type: Boolean, default: false },
+  receptorTraccarDesde: { type: Date, select: false },
   garantiaAte: String,
   revisaoVinculoChip: { type: Number, select: false },
   ultimoGpsEm: Date,
@@ -36,6 +38,7 @@ dispositivo.add({
   lacunasRecepcao: { type: [{ _id: false, ultimaRecepcao: Date, retomadaEm: Date }], default: undefined },
 });
 dispositivo.index({ clienteId: 1, codigoExterno: 1 }, { unique: true, partialFilterExpression: { codigoExterno: { $gt: '' } } });
+dispositivo.index({ codigoExterno: 1 }, { unique: true, partialFilterExpression: { receptorTraccar: true, ativo: true } });
 const Dispositivo = mongoose.model('DispositivoIntegracao', dispositivo);
 const estado = new mongoose.Schema({ clienteId: { type: mongoose.Schema.Types.ObjectId, required: true }, pneuId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true }, veiculoId: { type: mongoose.Schema.Types.ObjectId, default: null }, posicao: String, odometroMontagem: Number, kmAcumulados: { type: Number, default: 0 }, recapagens: { type: Number, default: 0 }, sulcoMm: Number, ultimaData: Date });
 estado.index({ clienteId: 1, veiculoId: 1, posicao: 1 }, { unique: true, partialFilterExpression: { veiculoId: { $type: 'objectId' } } });

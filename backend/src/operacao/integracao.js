@@ -11,7 +11,26 @@ const limites = new Map();
 router.use(async (req, res, next) => {
   try {
     let doc;
-    if (['/traccar', '/video-eventos'].includes(req.path) && req.headers['x-gateway-id']) {
+    if (req.path === '/traccar-gerenciado') {
+      const esperado = process.env.TRACCAR_RECEPTOR_TOKEN;
+      const token = req.headers['x-receptor-token'];
+      if (!/^[a-f\d]{64}$/.test(esperado ?? '') || typeof token !== 'string' ||
+          !/^[a-f\d]{64}$/.test(token) || !crypto.timingSafeEqual(Buffer.from(token, 'hex'), Buffer.from(esperado, 'hex'))) {
+        return res.status(401).json({ sucesso: false, mensagem: 'Credencial do receptor inválida.' });
+      }
+      const codigo = req.body?.device?.uniqueId;
+      const cadastro = req.body?.device?.attributes?.linktracCadastro;
+      if (typeof codigo !== 'string' || !/^\d{15}$/.test(codigo) || !id(cadastro)) {
+        return res.status(400).json({ sucesso: false, mensagem: 'Identificação do equipamento inválida.' });
+      }
+      doc = await Dispositivo.findOne({ _id: cadastro, codigoExterno: codigo, receptorTraccar: true, ativo: true })
+        .select('+receptorTraccarDesde');
+      if (!doc?.receptorTraccarDesde) return res.status(404).json({ sucesso: false, mensagem: 'Equipamento indisponível no receptor.' });
+      const fixTime = Date.parse(req.body?.position?.fixTime);
+      if (Number.isFinite(fixTime) && fixTime < doc.receptorTraccarDesde.getTime()) {
+        return res.json({ sucesso: true, ignorada: true });
+      }
+    } else if (['/traccar', '/video-eventos'].includes(req.path) && req.headers['x-gateway-id']) {
       const gid = req.headers['x-gateway-id']; const token = req.headers['x-gateway-token'];
       if (!id(gid) || typeof token !== 'string' || !/^[a-f\d]{64}$/.test(token)) return res.status(401).json({ sucesso: false, mensagem: 'Credencial de gateway inválida.' });
       const gateway = await Gateway.findOne({ _id: gid, ativo: true }).select('+tokenHash');
@@ -70,7 +89,7 @@ router.post('/lote', async (req, res) => {
   if (resultados.some(r => r.sucesso)) await registrarRecepcao(req, ultima, true);
   return res.json({ sucesso: true, resultados, aceitas: resultados.filter((r) => r.sucesso).length });
 });
-router.post('/traccar', async (req, res) => {
+router.post(['/traccar', '/traccar-gerenciado'], async (req, res) => {
   let body;
   try { body = require('./traccar').converterTraccar(req.body, req.dispositivo.codigoExterno, { aceitarAlarmeSemGps: true }); }
   catch (e) { return res.status(400).json({ sucesso: false, mensagem: e.message }); }

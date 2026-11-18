@@ -45,7 +45,7 @@ const tratar = (acao) => async (req, res) => {
   try {
     await acao(req, res);
   } catch (e) {
-    const mensagem = e.code === 11000 ? 'Este código externo já está cadastrado na empresa de destino.'
+    const mensagem = e.code === 11000 ? 'Este código externo já está cadastrado para este tipo de recepção.'
       : e.status ? e.message : 'Não foi possível concluir a operação do equipamento.';
     return res.status(e.code === 11000 ? 409 : e.status || 503).json({ sucesso: false, mensagem });
   }
@@ -90,6 +90,10 @@ function dadosCadastro(b) {
     rejeitar(400, 'Informe nome e veículo válidos.');
   }
   const dados = { nome: b.nome.trim(), veiculoId: b.veiculoId };
+  if (b.receptorTraccar !== undefined) {
+    if (typeof b.receptorTraccar !== 'boolean') rejeitar(400, 'Selecione um tipo de recepção válido.');
+    dados.receptorTraccar = b.receptorTraccar;
+  }
   for (const campo of ['fabricante', 'modelo', 'codigoExterno']) {
     if (b[campo] === undefined) continue;
     if (typeof b[campo] !== 'string' || b[campo].length > 100) rejeitar(400, 'Confira os dados do equipamento.');
@@ -100,6 +104,12 @@ function dadosCadastro(b) {
     dados.garantiaAte = b.garantiaAte || undefined;
   }
   return dados;
+}
+
+function validarReceptor(doc, veiculo) {
+  if (!doc.receptorTraccar) return;
+  if (!/^\d{15}$/.test(doc.codigoExterno ?? '')) rejeitar(400, 'Informe os 15 dígitos do IMEI para usar o receptor Linktrac.');
+  if (veiculo.marca === 'TESTE' && veiculo.modelo === 'SIMULACAO') rejeitar(400, 'Vincule o rastreador a um veículo real para usar o receptor Linktrac.');
 }
 
 router.get('/', tratar(async (req, res) => {
@@ -194,6 +204,8 @@ router.post('/', tratar(async (req, res) => {
   const doc = await mongoose.connection.transaction(async (session) => {
     const vinculo = await contexto(clienteId, dados.veiculoId, session);
     const equipamento = new Dispositivo({ ...dados, clienteId, tokenHash: hashToken(token) });
+    validarReceptor(equipamento, vinculo.veiculo);
+    if (equipamento.receptorTraccar) equipamento.receptorTraccarDesde = new Date();
     await equipamento.save({ session });
     await registrar(session, req, equipamento._id, 'cadastro', undefined, instantaneo(equipamento, vinculo));
     return equipamento;
@@ -245,7 +257,11 @@ async function alterar(req, tipo) {
       await atualizarVinculoDeEquipamento(req, doc, mudouEmpresa ? 'equipamento_transferido' : 'troca_veiculo', session, origem, destinoChip);
     }
     doc.set({ ...dados, clienteId });
+    validarReceptor(doc, destino.veiculo);
     if (!doc.isModified()) return {};
+    if (doc.receptorTraccar && (mudouVinculo || mudouCodigo || doc.isModified('receptorTraccar'))) {
+      doc.receptorTraccarDesde = new Date();
+    }
     const token = mudouEmpresa ? novoToken() : undefined;
     if (mudouEmpresa) doc.tokenHash = hashToken(token);
     if (mudouVinculo || mudouCodigo) {

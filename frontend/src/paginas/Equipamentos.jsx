@@ -106,6 +106,7 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
   const [identificacao, setIdentificacao] = useState(null);
   const sugeridos = useRef({});
   const codigo = form.codigoExterno.trim();
+  const receptorTraccar = !somenteCameras && (form.receptorTraccar ?? /^\d{15}$/.test(codigo));
   const clienteId = form.clienteId || String(user.clienteId);
 
   async function carregarLista() {
@@ -193,6 +194,7 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
       clienteId: d.clienteId?._id,
       veiculoId: d.veiculoId?._id || '',
       garantiaAte: d.garantiaAte || '',
+      receptorTraccar: d.receptorTraccar === true,
     });
     setErro('');
     setMensagem('');
@@ -208,12 +210,13 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
     setToken(null);
     setRevelar(false);
     try {
+      const dados = { ...form, receptorTraccar };
       const { data } = editando
         ? await api.put(`/operacao/dispositivos/${editando._id}`, {
-            ...form, origemClienteId: editando.clienteId?._id,
+            ...dados, origemClienteId: editando.clienteId?._id,
             origemVeiculoId: editando.veiculoId?._id,
           })
-        : await api.post('/operacao/dispositivos', form);
+        : await api.post('/operacao/dispositivos', dados);
       const mudouEmpresa = editando && clienteId !== editando.clienteId?._id;
       if (data.dados?.token) setToken(data.dados);
       setMensagem(mudouEmpresa
@@ -272,6 +275,11 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
           <input required={campo === 'nome'} maxLength={100} value={form[campo]}
             onChange={e => alterarCampo(campo, e.target.value)} />
         </label>)}
+        {!somenteCameras && <label className="central-full">
+          <input type="checkbox" checked={receptorTraccar}
+            onChange={e => setForm(v => ({ ...v, receptorTraccar: e.target.checked }))} />
+          Usar o receptor da Linktrac para este rastreador
+        </label>}
         {identificacao?.codigo === codigo && <div className="central-full" aria-live="polite">
           {identificacao.dados?.fonte === 'imei' && <p>IMEI encontrado nos cadastros da sua empresa.</p>}
           {identificacao.dados?.fonte === 'base_tac' && <p>
