@@ -22,6 +22,8 @@ it('habilita satélite e trânsito da TomTom com uma única chave de navegador',
   expect(tiles).toHaveBeenCalledWith(expect.stringContaining('/flow/raster/tile/{z}/{x}/{y}?apiVersion=2&key=chave-teste'), expect.any(Object));
   expect(fundos['Satélite'].getAttribution()).toContain('Maxar');
   expect(sobreposicoes['Trânsito'].getAttribution()).toContain('TomTom');
+  expect(fundos['Satélite'].options.crossOrigin).toBe('anonymous');
+  expect(sobreposicoes['Trânsito'].options.crossOrigin).toBe('anonymous');
 });
 
 it('permite trocar o fundo e alternar o trajeto, as posições e as cercas', () => {

@@ -18,10 +18,12 @@ export function criarCamadasMapa() {
   const sobreposicoes = {};
   if (satelite) fundos['Satélite'] = L.tileLayer(satelite, {
     maxZoom: 19,
+    crossOrigin: satelitePersonalizado ? false : 'anonymous',
     attribution: import.meta.env.VITE_MAP_SATELLITE_ATTRIBUTION || (satelitePersonalizado ? '' : '© TomTom, Maxar'),
   });
   if (transito) sobreposicoes['Trânsito'] = L.tileLayer(transito, {
     maxZoom: 19,
+    crossOrigin: transitoPersonalizado ? false : 'anonymous',
     zIndex: 5,
     attribution: import.meta.env.VITE_MAP_TRAFFIC_ATTRIBUTION || (transitoPersonalizado ? '' : '© TomTom'),
   });
