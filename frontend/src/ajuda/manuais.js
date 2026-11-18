@@ -286,7 +286,7 @@ export const manuais = {
     ],
     limites: ['A disponibilidade dos eventos e dos clipes depende do equipamento e do integrador. A tela exibe eventos recebidos e links de clipes.'],
     empresa: { passos: [
-      'Cadastre a câmera ou o gravador em Equipamentos e credenciais e associe ao veículo.',
+      'Em Cadastros → Câmeras, cadastre a câmera ou o gravador e associe ao veículo.',
       'Configure o fornecedor ou integrador para enviar os eventos e links dos clipes conforme a documentação da API em Integrações e disponibilidade.',
     ] },
   },
@@ -330,7 +330,7 @@ export const manuais = {
 };
 export const secaoPorRota = {
   '/': 'painel', '/dashboard': 'painel', '/mapa': 'painel', '/minhas-rotas': 'rotasMapa', '/rastreamento': 'rastreamento', '/veiculos': 'veiculos',
-  '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
+  '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/cameras': 'videotelemetria', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
   '/monitoramento': 'monitoramento', '/agro': 'agro',
   '/usuarios': 'usuarios', '/espelhamentos': 'espelhamentos', '/login': 'login', '/register': 'registro',
 };

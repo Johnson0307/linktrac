@@ -9,10 +9,15 @@ import './NavBar.css';
 const itens = [
  ['/', 'Visão geral', 'painel', 'Operação'], ['/mapa','Mapa geral','mapa','Operação'], ['/rastreamento','Rastreamento','mapa','Operação'],
  ['/monitoramento','Central de monitoramento','painel','Operação'], ['/agro','Agro e talhões','mapa','Operação'],
- ['/historicos','Históricos','historico','Operação'], ['/veiculos','Veículos','veiculo','Cadastros'],
- ['/rastreadores','Rastreadores','ajustes','Cadastros'], ['/motoristas','Motoristas','pessoas','Cadastros'], ['/manutencao','Manutenção','ferramenta','Gestão'],
+ ['/historicos','Históricos','historico','Operação'], ['/manutencao','Manutenção','ferramenta','Gestão'],
  ['/relatorios','Relatórios','relatorio','Relatórios'],
  ['/configuracoes','Configurações','ajustes','Administração'], ['/manuais','Manuais','relatorio','Ajuda']
+];
+const cadastros = [
+ ['/rastreadores','Rastreadores','ajustes','Cadastros'],
+ ['/cameras','Câmeras','camera','Cadastros'],
+ ['/veiculos','Veículos','veiculo','Cadastros'],
+ ['/motoristas','Motoristas','pessoas','Cadastros'],
 ];
 export default function NavBar(){
  const {pathname}=useLocation(); const navigate=useNavigate(); const {user,logout,loading}=useAuth();
@@ -20,7 +25,7 @@ export default function NavBar(){
  const [aberto,setAberto]=useState(false);
  useEffect(()=>{setAberto(false)},[pathname]);
  useEffect(()=>{if(!aberto)return undefined;const fechar=e=>{if(e.key==='Escape')setAberto(false)};window.addEventListener('keydown',fechar);return()=>window.removeEventListener('keydown',fechar)},[aberto]);
- const menu=[...itens,...(['admin','gestor','motorista'].includes(user?.role)?[['/tms','Roteirização de entregas','carga','Operação'],['/minhas-rotas',user.role==='motorista'?'Minhas rotas':'Rotas atribuídas','mapa','Operação']]:[]),...(['admin','gestor'].includes(user?.role)?[['/manutencao-inteligente','Manutenção inteligente','ferramenta','Gestão'],['/operacao','Central operacional','ajustes','Gestão'],['/usuarios','Usuários','pessoas','Administração']]:[]),...(user?.role==='admin'?[['/clientes','Clientes','pessoas','Administração']]:[]),...(marca.podeEditar?[['/marca','Identidade visual','ajustes','Administração']]:[]),...(user?.podeGerenciarEspelhamentos?[['/espelhamentos','Espelhamentos','compartilhar','Administração'],['/briefings','Briefings e melhorias','relatorio','Administração']]:[])].filter(([path])=>permiteRota(user,path));
+ const menu=[...itens,...(user?.role==='admin'?[['/clientes','Clientes','pessoas','Cadastros']]:[]),...cadastros,...(['admin','gestor','motorista'].includes(user?.role)?[['/tms','Roteirização de entregas','carga','Operação'],['/minhas-rotas',user.role==='motorista'?'Minhas rotas':'Rotas atribuídas','mapa','Operação']]:[]),...(['admin','gestor'].includes(user?.role)?[['/manutencao-inteligente','Manutenção inteligente','ferramenta','Gestão'],['/operacao','Central operacional','ajustes','Gestão'],['/usuarios','Usuários','pessoas','Administração']]:[]),...(marca.podeEditar?[['/marca','Identidade visual','ajustes','Administração']]:[]),...(user?.podeGerenciarEspelhamentos?[['/espelhamentos','Espelhamentos','compartilhar','Administração'],['/briefings','Briefings e melhorias','relatorio','Administração']]:[])].filter(([path])=>permiteRota(user,path));
  const tituloEspecial = {
    '/visao-plataforma': 'Visão geral da plataforma',
    '/resumo-semanal': 'Resumo semanal',

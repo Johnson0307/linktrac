@@ -1,5 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import api from '../api/api';
+import { useAuth } from '../contexts/AuthContext';
+import { permite } from '../ajuda/acessos';
+import './CentralOperacao.css';
 const CatalogoRastreadores = lazy(() => import('./CatalogoRastreadores'));
 
 const vazio = { nome: '', fabricante: '', modelo: '', codigoExterno: '', veiculoId: '', garantiaAte: '' };
@@ -80,7 +83,14 @@ function HistoricoEquipamentos({ dispositivo, versao }) {
   </section>;
 }
 
-export default function Equipamentos({ user, somenteHistorico = false, versao, podeConfigurar = true }) {
+export function CadastroCameras() {
+  const { user } = useAuth();
+  return <div className="central-page">
+    <Equipamentos key={user.clienteId} user={user} somenteCameras podeConfigurar={permite(user, 'equipamentos', true)} />
+  </div>;
+}
+
+export default function Equipamentos({ user, somenteHistorico = false, somenteCameras = false, versao, podeConfigurar = true }) {
   const [lista, setLista] = useState([]);
   const [limitado, setLimitado] = useState(false);
   const [opcoes, setOpcoes] = useState({ empresas: [], veiculos: [] });
@@ -249,10 +259,10 @@ export default function Equipamentos({ user, somenteHistorico = false, versao, p
     {erro && <p role="alert" className="central-error">{erro}</p>}
     {mensagem && <p role="status" className="central-success">{mensagem}</p>}
     {podeConfigurar && <form id="form-equipamento" className="central-card" onSubmit={salvar}>
-      <h3>{editando ? 'Editar equipamento' : 'Cadastrar equipamento'}</h3>
+      <h3>{editando ? 'Editar equipamento' : somenteCameras ? 'Cadastrar câmera ou gravador' : 'Cadastrar equipamento'}</h3>
       <fieldset disabled={ocupado} className="central-form">
         <Suspense fallback={<p>Carregando catálogo de rastreadores...</p>}>
-          <CatalogoRastreadores fabricante={form.fabricante} modelo={form.modelo}
+          <CatalogoRastreadores fabricante={form.fabricante} modelo={form.modelo} somenteCameras={somenteCameras}
             selecionar={({ fabricante, modelo }) => {
               sugeridos.current = {};
               setForm(atuais => ({ ...atuais, fabricante, modelo }));

@@ -3,6 +3,7 @@ import AssistenteManutencao from './paginas/AssistenteManutencao';
 import Historicos from './paginas/Historicos.jsx';
 import { lazy, Suspense } from 'react';
 import CentralOperacao from './paginas/CentralOperacao';
+import { CadastroCameras } from './paginas/Equipamentos';
 import ManualUso from './componentes/ManualUso';
 import Manuais from './paginas/Manuais';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -67,6 +68,7 @@ function App() {
               <Route path="/rastreamento" element={<Rastreamento />} />
               <Route path="/veiculos" element={<Veiculos />} />
               <Route path="/rastreadores" element={<CentralOperacao inicial="dispositivos" />} />
+              <Route path="/cameras" element={<CadastroCameras />} />
               <Route path="/motoristas" element={<Motoristas />} />
               <Route path="/manutencao" element={<Historicos inicial="manutencoes" />} />
               <Route path="/historicos" element={<Historicos />} />
