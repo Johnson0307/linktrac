@@ -135,7 +135,9 @@ router.get('/opcoes', tratar(async (req, res) => {
   const empresa = empresas.find((item) => String(item._id) === clienteId);
   if (!empresa) rejeitar(404, 'Empresa de destino indisponível.');
   const veiculos = await Veiculo.find({ clienteId }).select('placa marca modelo').sort({ placa: 1 }).lean();
-  return res.json({ sucesso: true, empresas, veiculos });
+  const receptor = process.env.TRACCAR_API_URL && process.env.TRACCAR_PUBLIC_HOST
+    ? { endereco: process.env.TRACCAR_PUBLIC_HOST, protocolo: 'GT06', porta: 5023, transporte: 'TCP' } : null;
+  return res.json({ sucesso: true, empresas, veiculos, receptor });
 }));
 
 router.get('/identificar', tratar(async (req, res) => {

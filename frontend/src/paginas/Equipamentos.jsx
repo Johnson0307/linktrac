@@ -280,6 +280,11 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
             onChange={e => setForm(v => ({ ...v, receptorTraccar: e.target.checked }))} />
           Usar o receptor da Linktrac para este rastreador
         </label>}
+        {receptorTraccar && <p className="central-full">
+          {opcoes.receptor
+            ? `Receptor ${opcoes.receptor.endereco} · ${opcoes.receptor.protocolo} · Porta ${opcoes.receptor.porta}/${opcoes.receptor.transporte}. Outros protocolos exigem habilitação da porta correspondente.`
+            : 'A sincronização depende da configuração do receptor no servidor.'}
+        </p>}
         {identificacao?.codigo === codigo && <div className="central-full" aria-live="polite">
           {identificacao.dados?.fonte === 'imei' && <p>IMEI encontrado nos cadastros da sua empresa.</p>}
           {identificacao.dados?.fonte === 'base_tac' && <p>
