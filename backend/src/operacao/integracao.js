@@ -20,7 +20,7 @@ router.use(async (req, res, next) => {
       }
       const codigo = req.body?.device?.uniqueId;
       const cadastro = req.body?.device?.attributes?.linktracCadastro;
-      if (typeof codigo !== 'string' || !/^\d{15}$/.test(codigo) || !id(cadastro)) {
+      if (typeof codigo !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(codigo) || !id(cadastro)) {
         return res.status(400).json({ sucesso: false, mensagem: 'Identificação do equipamento inválida.' });
       }
       doc = await Dispositivo.findOne({ _id: cadastro, codigoExterno: codigo, receptorTraccar: true, ativo: true })

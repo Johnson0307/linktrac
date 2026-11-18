@@ -29,6 +29,7 @@ const dispositivo = new mongoose.Schema({ clienteId: { type: mongoose.Schema.Typ
 dispositivo.index({ clienteId: 1, veiculoId: 1 });
 dispositivo.add({
   receptorTraccar: { type: Boolean, default: false },
+  protocoloReceptor: String,
   receptorTraccarDesde: { type: Date, select: false },
   garantiaAte: String,
   revisaoVinculoChip: { type: Number, select: false },

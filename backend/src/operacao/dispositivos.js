@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const crypto = require('node:crypto');
+const { readFile } = require('node:fs/promises');
 const mongoose = require('mongoose');
 const Cliente = require('../models/Cliente');
 const Veiculo = require('../models/Veiculo');
@@ -94,6 +95,12 @@ function dadosCadastro(b) {
     if (typeof b.receptorTraccar !== 'boolean') rejeitar(400, 'Selecione um tipo de recepção válido.');
     dados.receptorTraccar = b.receptorTraccar;
   }
+  if (b.protocoloReceptor !== undefined) {
+    if (typeof b.protocoloReceptor !== 'string' || !/^[a-z][a-z0-9]{0,39}$/.test(b.protocoloReceptor)) {
+      rejeitar(400, 'Selecione um protocolo de recepção válido.');
+    }
+    dados.protocoloReceptor = b.protocoloReceptor;
+  }
   for (const campo of ['fabricante', 'modelo', 'codigoExterno']) {
     if (b[campo] === undefined) continue;
     if (typeof b[campo] !== 'string' || b[campo].length > 100) rejeitar(400, 'Confira os dados do equipamento.');
@@ -108,7 +115,9 @@ function dadosCadastro(b) {
 
 function validarReceptor(doc, veiculo) {
   if (!doc.receptorTraccar) return;
-  if (!/^\d{15}$/.test(doc.codigoExterno ?? '')) rejeitar(400, 'Informe os 15 dígitos do IMEI para usar o receptor Linktrac.');
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(doc.codigoExterno ?? '')) {
+    rejeitar(400, 'Informe o IMEI ou identificador do aparelho exigido pelo protocolo selecionado.');
+  }
   if (veiculo.marca === 'TESTE' && veiculo.modelo === 'SIMULACAO') rejeitar(400, 'Vincule o rastreador a um veículo real para usar o receptor Linktrac.');
 }
 
@@ -135,8 +144,17 @@ router.get('/opcoes', tratar(async (req, res) => {
   const empresa = empresas.find((item) => String(item._id) === clienteId);
   if (!empresa) rejeitar(404, 'Empresa de destino indisponível.');
   const veiculos = await Veiculo.find({ clienteId }).select('placa marca modelo').sort({ placa: 1 }).lean();
-  const receptor = process.env.TRACCAR_API_URL && process.env.TRACCAR_PUBLIC_HOST
+  let receptor = process.env.TRACCAR_API_URL && process.env.TRACCAR_PUBLIC_HOST
     ? { endereco: process.env.TRACCAR_PUBLIC_HOST, protocolo: 'GT06', porta: 5023, transporte: 'TCP' } : null;
+  if (receptor && process.env.TRACCAR_PROTOCOLS_FILE) {
+    try {
+      const protocolos = JSON.parse(await readFile(process.env.TRACCAR_PROTOCOLS_FILE, 'utf8'));
+      if (!Array.isArray(protocolos) || !protocolos.length) throw new Error('Configuração de protocolos inválida');
+      receptor = { endereco: receptor.endereco, protocolos };
+    } catch {
+      receptor = { endereco: receptor.endereco, protocolos: [], indisponivel: true };
+    }
+  }
   return res.json({ sucesso: true, empresas, veiculos, receptor });
 }));
 

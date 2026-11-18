@@ -32,8 +32,8 @@ it('receptor gerenciado restringe IMEI ao cadastro autorizado e ignora posiçõe
  const find=vi.spyOn(Dispositivo,'findOne').mockReturnValue({select:async()=>({_id:id,receptorTraccarDesde:new Date('2026-11-18T18:00:00Z')})});
  const veiculo=vi.spyOn(Veiculo,'findOne');
  const resposta=await request('/traccar-gerenciado',{integracao:true,headers:{'x-receptor-token':token},body:{
-   device:{uniqueId:'123456789012345',attributes:{linktracCadastro:id}},position:{fixTime:'2026-11-18T17:59:00Z'},
+   device:{uniqueId:'ST1234567',attributes:{linktracCadastro:id}},position:{fixTime:'2026-11-18T17:59:00Z'},
  }});
- expect(find).toHaveBeenCalledWith({_id:id,codigoExterno:'123456789012345',receptorTraccar:true,ativo:true});
+ expect(find).toHaveBeenCalledWith({_id:id,codigoExterno:'ST1234567',receptorTraccar:true,ativo:true});
  expect(resposta.status).toBe(200);expect(resposta.body.ignorada).toBe(true);expect(veiculo).not.toHaveBeenCalled();
 });

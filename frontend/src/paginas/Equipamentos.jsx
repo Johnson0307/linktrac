@@ -107,6 +107,9 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
   const sugeridos = useRef({});
   const codigo = form.codigoExterno.trim();
   const receptorTraccar = !somenteCameras && (form.receptorTraccar ?? /^\d{15}$/.test(codigo));
+  const protocolosReceptor = opcoes.receptor?.protocolos ?? (opcoes.receptor?.protocolo
+    ? [{ protocolo: 'gt06', porta: 5023, transportes: ['TCP'] }] : []);
+  const protocoloReceptor = protocolosReceptor.find(p => p.protocolo === form.protocoloReceptor);
   const clienteId = form.clienteId || String(user.clienteId);
 
   async function carregarLista() {
@@ -195,6 +198,7 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
       veiculoId: d.veiculoId?._id || '',
       garantiaAte: d.garantiaAte || '',
       receptorTraccar: d.receptorTraccar === true,
+      protocoloReceptor: d.protocoloReceptor || (d.receptorTraccar ? 'gt06' : ''),
     });
     setErro('');
     setMensagem('');
@@ -211,6 +215,7 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
     setRevelar(false);
     try {
       const dados = { ...form, receptorTraccar };
+      if (!dados.protocoloReceptor) delete dados.protocoloReceptor;
       const { data } = editando
         ? await api.put(`/operacao/dispositivos/${editando._id}`, {
             ...dados, origemClienteId: editando.clienteId?._id,
@@ -266,9 +271,9 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
       <fieldset disabled={ocupado} className="central-form">
         <Suspense fallback={<p>Carregando catálogo de rastreadores...</p>}>
           <CatalogoRastreadores fabricante={form.fabricante} modelo={form.modelo} somenteCameras={somenteCameras}
-            selecionar={({ fabricante, modelo }) => {
+            selecionar={({ fabricante, modelo, protocolo }) => {
               sugeridos.current = {};
-              setForm(atuais => ({ ...atuais, fabricante, modelo }));
+              setForm(atuais => ({ ...atuais, fabricante, modelo, protocoloReceptor: protocolo || '' }));
             }} />
         </Suspense>
         {campos.map(([campo, label]) => <label key={campo}>{label}
@@ -280,10 +285,20 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
             onChange={e => setForm(v => ({ ...v, receptorTraccar: e.target.checked }))} />
           Usar o receptor da Linktrac para este rastreador
         </label>}
+        {receptorTraccar && <label className="central-full">Protocolo de recepção
+          <select required value={form.protocoloReceptor || ''}
+            onChange={e => setForm(v => ({ ...v, protocoloReceptor: e.target.value }))}>
+            <option value="">Selecione o protocolo do aparelho</option>
+            {protocolosReceptor.map(p => <option key={p.protocolo} value={p.protocolo}>
+              {p.protocolo.toUpperCase()} · {p.porta} · {p.transportes.join('/')}
+            </option>)}
+          </select>
+        </label>}
         {receptorTraccar && <p className="central-full">
-          {opcoes.receptor
-            ? `Receptor ${opcoes.receptor.endereco} · ${opcoes.receptor.protocolo} · Porta ${opcoes.receptor.porta}/${opcoes.receptor.transporte}. Outros protocolos exigem habilitação da porta correspondente.`
-            : 'A sincronização depende da configuração do receptor no servidor.'}
+          {protocoloReceptor
+            ? `IP ${opcoes.receptor.endereco} · Porta ${protocoloReceptor.porta}/${protocoloReceptor.transportes.join('/')}.`
+            : opcoes.receptor?.indisponivel ? 'A lista de protocolos está temporariamente indisponível.'
+            : 'Selecione o protocolo indicado no manual do aparelho e confira o IMEI ou identificador usado por esse protocolo.'}
         </p>}
         {identificacao?.codigo === codigo && <div className="central-full" aria-live="polite">
           {identificacao.dados?.fonte === 'imei' && <p>IMEI encontrado nos cadastros da sua empresa.</p>}
