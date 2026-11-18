@@ -66,6 +66,7 @@ function App() {
               <Route path="/visao-plataforma" element={<Suspense fallback={<p role="status">Carregando funções…</p>}><VisaoPlataforma /></Suspense>} />
               <Route path="/rastreamento" element={<Rastreamento />} />
               <Route path="/veiculos" element={<Veiculos />} />
+              <Route path="/rastreadores" element={<CentralOperacao inicial="dispositivos" />} />
               <Route path="/motoristas" element={<Motoristas />} />
               <Route path="/manutencao" element={<Historicos inicial="manutencoes" />} />
               <Route path="/historicos" element={<Historicos />} />

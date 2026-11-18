@@ -15,6 +15,7 @@ export const moduloDaArea = area => ({
 export function permiteRota(user, pathname) {
   if (pathname === '/clientes' && user?.podeGerenciarCarteira) return true;
   if (pathname === '/operacao') return areasCentrais.some(modulo => permite(user, modulo));
+  if (pathname === '/rastreadores') return ['admin', 'gestor'].includes(user?.role) && permite(user, 'equipamentos');
   if (pathname === '/monitoramento') return ['admin', 'gestor', 'operador'].includes(user?.role) && permite(user, 'operacao');
   if (pathname === '/agro') return ['admin', 'gestor'].includes(user?.role) && permite(user, 'operacao');
   if (pathname === '/historicos') return ['rastreamento', 'manutencao', 'usuarios'].some(modulo => permite(user, modulo));

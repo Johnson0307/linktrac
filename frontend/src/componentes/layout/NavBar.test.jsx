@@ -20,6 +20,20 @@ it('preserva os menus de administração conforme o perfil', () => {
   abrir({ nome: 'Linktrac', role: 'admin', podeGerenciarEspelhamentos: true });
   expect(screen.getByRole('link', { name: 'Espelhamentos' })).toBeTruthy();
 });
+it('exibe Rastreadores logo abaixo de Veículos para quem pode consultar equipamentos', () => {
+  abrir({ nome: 'Gestor', role: 'gestor', acessos: { veiculos: 'consulta', equipamentos: 'consulta' } });
+  const veiculos = screen.getByRole('link', { name: 'Veículos' });
+  const rastreadores = screen.getByRole('link', { name: 'Rastreadores' });
+  expect(veiculos.nextElementSibling).toBe(rastreadores);
+  expect(rastreadores.getAttribute('href')).toBe('/rastreadores');
+});
+it.each([
+  { role: 'gestor', acessos: { equipamentos: 'bloqueado' } },
+  { role: 'operador', acessos: { equipamentos: 'configurar' } },
+])('oculta Rastreadores sem acesso ao cadastro operacional', (user) => {
+  abrir({ nome: 'Cliente', ...user });
+  expect(screen.queryByRole('link', { name: 'Rastreadores' })).toBeNull();
+});
 it('permite abrir e fechar a navegação móvel pelo teclado', () => {
   abrir({ nome: 'Johnson', role: 'admin' });
   const menu = screen.getByRole('button', { name: 'Abrir navegação' });

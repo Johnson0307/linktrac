@@ -10,7 +10,7 @@ const itens = [
  ['/', 'Visão geral', 'painel', 'Operação'], ['/mapa','Mapa geral','mapa','Operação'], ['/rastreamento','Rastreamento','mapa','Operação'],
  ['/monitoramento','Central de monitoramento','painel','Operação'], ['/agro','Agro e talhões','mapa','Operação'],
  ['/historicos','Históricos','historico','Operação'], ['/veiculos','Veículos','veiculo','Cadastros'],
- ['/motoristas','Motoristas','pessoas','Cadastros'], ['/manutencao','Manutenção','ferramenta','Gestão'],
+ ['/rastreadores','Rastreadores','ajustes','Cadastros'], ['/motoristas','Motoristas','pessoas','Cadastros'], ['/manutencao','Manutenção','ferramenta','Gestão'],
  ['/relatorios','Relatórios','relatorio','Relatórios'],
  ['/configuracoes','Configurações','ajustes','Administração'], ['/manuais','Manuais','relatorio','Ajuda']
 ];

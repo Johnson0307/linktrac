@@ -264,7 +264,7 @@ export const manuais = {
     titulo: 'Rastreadores, credenciais e histórico',
     objetivo: 'Cadastrar rastreadores, configurar o envio de dados e acompanhar alterações de vínculo.',
     uso: [
-      'Em Central operacional, abra Equipamentos e credenciais. Consulte a última comunicação e os campos recebidos, como posição GPS, ignição e alimentação.',
+      'Em Cadastros → Rastreadores, consulte a última comunicação e os campos recebidos, como posição GPS, ignição e alimentação.',
       'No cadastro, abra Buscar marca ou modelo no catálogo e selecione um resultado para ver as configurações disponíveis e os manuais do modelo.',
       'Use Histórico na linha do equipamento ou abra Histórico de equipamentos para consultar cadastros, edições, transferências, desativações e exclusões. Confira a data, o horário e as empresas e veículos envolvidos, quando informados.',
     ],
@@ -330,7 +330,7 @@ export const manuais = {
 };
 export const secaoPorRota = {
   '/': 'painel', '/dashboard': 'painel', '/mapa': 'painel', '/minhas-rotas': 'rotasMapa', '/rastreamento': 'rastreamento', '/veiculos': 'veiculos',
-  '/operacao': 'operacao', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
+  '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
   '/monitoramento': 'monitoramento', '/agro': 'agro',
   '/usuarios': 'usuarios', '/espelhamentos': 'espelhamentos', '/login': 'login', '/register': 'registro',
 };
