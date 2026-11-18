@@ -26,7 +26,8 @@ router.use(async (req, res, next) => {
       doc = await Dispositivo.findOne({ _id: cadastro, codigoExterno: codigo, receptorTraccar: true, ativo: true })
         .select('+receptorTraccarDesde');
       if (!doc?.receptorTraccarDesde) return res.status(404).json({ sucesso: false, mensagem: 'Equipamento indisponível no receptor.' });
-      const fixTime = Date.parse(req.body?.position?.fixTime);
+      const fixTime = Date.parse(req.body?.position?.id === 0
+        ? req.body.position.serverTime : req.body?.position?.fixTime);
       if (Number.isFinite(fixTime) && fixTime < doc.receptorTraccarDesde.getTime()) {
         return res.json({ sucesso: true, ignorada: true });
       }
@@ -91,8 +92,20 @@ router.post('/lote', async (req, res) => {
 });
 router.post(['/traccar', '/traccar-gerenciado'], async (req, res) => {
   let body;
-  try { body = require('./traccar').converterTraccar(req.body, req.dispositivo.codigoExterno, { aceitarAlarmeSemGps: true }); }
-  catch (e) { return res.status(400).json({ sucesso: false, mensagem: e.message }); }
+  try { body = require('./traccar').converterTraccar(req.body, req.dispositivo.codigoExterno, {
+    aceitarAlarmeSemGps: true, aceitarComunicacaoSemPosicao: req.path === '/traccar-gerenciado',
+  }); }
+  catch (e) {
+    if (req.path === '/traccar-gerenciado') {
+      const p = req.body?.position;
+      console.warn('Receptor gerenciado recusou leitura.', {
+        mensagem: e.message, identificadorPosicao: p?.id ?? null,
+        horarioGpsValido: typeof p?.fixTime === 'string' && Number.isFinite(Date.parse(p.fixTime)),
+        horarioRecepcaoValido: typeof p?.serverTime === 'string' && Number.isFinite(Date.parse(p.serverTime)),
+      });
+    }
+    return res.status(400).json({ sucesso: false, mensagem: e.message });
+  }
   if (body.semGPS) {
     await verificarAlimentacao(req, body, res);
     await registrarRecepcao(req, body);

@@ -36,6 +36,16 @@ it('Traccar converte unidades conhecidas e não presume unidade de combustível'
  expect(r.velocidade).toBe(18.52);expect(r.telemetria).toEqual({odometroKm:12.5,eventosDirecao:['frenagem']});
  expect(()=>converterTraccar({device:{uniqueId:'outro'},position:{}},'abc')).toThrow();
 });
+it('recebe sinais de comunicação do receptor sem criar uma posição GPS fictícia', () => {
+ const body={device:{uniqueId:'abc'},position:{id:0,fixTime:'2026-01-01T10:00:00Z',
+   serverTime:'2026-01-01T10:01:00Z',valid:true,latitude:1,longitude:2,attributes:{ignition:true}}};
+ expect(()=>converterTraccar(body,'abc')).toThrow('sem identificador');
+ const leitura=converterTraccar(body,'abc',{aceitarComunicacaoSemPosicao:true});
+ expect(leitura).toMatchObject({semGPS:true,dataHora:'2026-01-01T10:01:00.000Z',ignicao:true});
+ expect(leitura).not.toHaveProperty('latitude');expect(leitura).not.toHaveProperty('mensagemId');
+ expect(()=>converterTraccar({...body,position:{...body.position,serverTime:undefined}},'abc',
+   {aceitarComunicacaoSemPosicao:true})).toThrow('horário de recebimento');
+});
 it('financeiro não apresenta custo/km sem base ou com regressão do odômetro',()=>{
  const fuel=[{dados:{valorReais:10.01,litros:2}}];
  expect(resumirFinanceiro(fuel,[],[]).custoPorKmReais).toBeNull();

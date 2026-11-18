@@ -1,7 +1,8 @@
-const converterTraccar = (body, codigoExterno, { aceitarAlarmeSemGps = false } = {}) => {
+const converterTraccar = (body, codigoExterno, { aceitarAlarmeSemGps = false, aceitarComunicacaoSemPosicao = false } = {}) => {
   const p = body?.position; const device = body?.device;
   if (!p || !device || !codigoExterno || String(device.uniqueId) !== codigoExterno) throw new Error('Identificador externo não corresponde ao equipamento cadastrado.');
-  if (!Number.isSafeInteger(p.id) || p.id < 1 || typeof p.fixTime !== 'string' || !Number.isFinite(Date.parse(p.fixTime))) throw new Error('Posição Traccar sem identificador ou horário válido.');
+  const comunicacao = aceitarComunicacaoSemPosicao && p.id === 0;
+  if (!Number.isSafeInteger(p.id) || (p.id < 1 && !comunicacao) || typeof p.fixTime !== 'string' || !Number.isFinite(Date.parse(p.fixTime))) throw new Error('Posição Traccar sem identificador ou horário válido.');
   const a = p.attributes || {}; const t = {};
   const alarmes = typeof a.alarm === 'string' ? a.alarm.split(',').map(valor => valor.trim()) : [];
   const corteAlimentacao = alarmes.includes('powerCut');
@@ -11,6 +12,13 @@ const converterTraccar = (body, codigoExterno, { aceitarAlarmeSemGps = false } =
   const dataHora = new Date(p.fixTime).toISOString();
   const dataHoraAlimentacao = corteAlimentacao !== restaurada && Number.isFinite(Date.parse(p.deviceTime))
     ? new Date(p.deviceTime).toISOString() : dataHora;
+  if (comunicacao) {
+    if (typeof p.serverTime !== 'string' || !Number.isFinite(Date.parse(p.serverTime)) ||
+        Date.parse(p.serverTime) < Date.UTC(2000, 0, 1)) throw new Error('Comunicação Traccar sem horário de recebimento válido.');
+    return { dataHora: new Date(p.serverTime).toISOString(), semGPS: true,
+      dataHoraAlimentacao, corteAlimentacao, telemetria: t,
+      ...(typeof a.ignition === 'boolean' ? { ignicao: a.ignition } : {}) };
+  }
   if (p.valid === false) {
     if (aceitarAlarmeSemGps && corteAlimentacao !== restaurada) {
       return { dataHora: dataHoraAlimentacao, semGPS: true, corteAlimentacao, telemetria: t };

@@ -15,12 +15,12 @@ const disponibilidade = [
   { recurso: 'Telemetria JSON, sensores e DTC', status: 'Software disponível; aguardando dados de equipamento compatível' },
   { recurso: 'RFID/iButton/identificador de câmera', status: 'Associação por identificador disponível; leitura física depende de integração' },
   { recurso: 'Videotelemetria', status: 'Recepção de eventos e links HTTPS de clipes via API. Protocolos proprietários e vídeo ao vivo dependem de integração.' },
-  { recurso: 'Protocolos TCP/UDP e mais de 500 modelos', status: 'Adaptador JSON Traccar disponível; instalar gateway e homologar cada modelo antes de operar' },
+  { recurso: 'Protocolos TCP/UDP e mais de 500 modelos', status: 'Receptor gerenciado e sincronização de cadastros disponíveis quando configurados no servidor. Consulte as portas ativas no cadastro e valide cada modelo com uma transmissão real.' },
   { recurso: 'Celular/satélite', status: 'Campo de rede disponível; troca de rede depende de hardware e serviço contratados' },
   { recurso: 'Posições offline', status: 'Reenvio por lote e deduplicação disponíveis; memória depende do aparelho' },
   { recurso: 'Bloqueio do veículo e travas', status: 'Sem transporte de comandos; nenhuma atuação física é executada' },
   { recurso: 'Avisos externos', status: 'E-mail e webhook opcionais para comunicação, saída de cerca e manutenção. Perda de alimentação do rastreador pode ser enviada ao contato autorizado do veículo pelo WhatsApp Business da empresa configurada.' },
-  { recurso: 'Rotas por ruas, trânsito e ETA', status: 'Sequência geográfica estimada disponível; trânsito e roteamento aguardam provedor' },
+  { recurso: 'Rotas por ruas, trânsito e ETA', status: 'Cálculo por ruas disponível com provedor configurado. Trânsito e ETA dependem da cobertura e dos dados recebidos.' },
   { recurso: 'SAP/TOTVS/Power BI', status: 'API JSON e CSV disponíveis; conectores específicos dependem do contrato de cada sistema' },
 ];
 openapi.components.securitySchemes.gatewayId = { type: 'apiKey', in: 'header', name: 'x-gateway-id' };
