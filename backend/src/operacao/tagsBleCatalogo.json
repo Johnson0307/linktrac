@@ -1,0 +1,20 @@
+[
+  {
+    "fabricante": "Teltonika",
+    "modelo": "EYE Beacon BTSID1",
+    "formatos": ["ibeacon", "eddystone"],
+    "fonte": "https://wiki.teltonika-gps.com/view/EYE_BEACON_/_BTSID1"
+  },
+  {
+    "fabricante": "Teltonika",
+    "modelo": "EYE Sensor BTSMP1",
+    "formatos": ["ibeacon", "eddystone"],
+    "fonte": "https://wiki.teltonika-gps.com/view/EYE_SENSOR_/_BTSMP1"
+  },
+  {
+    "fabricante": "Queclink",
+    "modelo": "WID310",
+    "formatos": ["mac"],
+    "fonte": "https://www.queclink.com/product-detail/wid310"
+  }
+]

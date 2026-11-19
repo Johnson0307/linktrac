@@ -27,6 +27,7 @@ import ProtectedRoute from './componentes/ProtectedRoute.jsx';
 import { MarcaProvider } from './contexts/MarcaContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
+const TagsBle = lazy(() => import('./paginas/TagsBle'));
 const ResumoSemanal = lazy(() => import('./paginas/ResumoSemanal'));
 const Briefings = lazy(() => import('./paginas/Briefings'));
 const Tms = lazy(() => import('./paginas/Tms'));
@@ -68,6 +69,7 @@ function App() {
               <Route path="/rastreamento" element={<Rastreamento />} />
               <Route path="/veiculos" element={<Veiculos />} />
               <Route path="/rastreadores" element={<CentralOperacao inicial="dispositivos" />} />
+              <Route path="/tags-ble" element={<Suspense fallback={<p role="status">Carregando tags...</p>}><TagsBle /></Suspense>} />
               <Route path="/cameras" element={<CadastroCameras />} />
               <Route path="/motoristas" element={<Motoristas />} />
               <Route path="/manutencao" element={<Historicos inicial="manutencoes" />} />

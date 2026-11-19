@@ -24,7 +24,7 @@ it('exibe os cinco atalhos de cadastro na ordem solicitada', () => {
   abrir({ nome: 'Administrador', role: 'admin' });
   const grupo = screen.getByText('Cadastros', { selector: 'summary' }).parentElement;
   expect(within(grupo).getAllByRole('link').map(link => link.textContent))
-    .toEqual(['Clientes', 'Rastreadores', 'Câmeras', 'Veículos', 'Motoristas']);
+    .toEqual(['Clientes', 'Rastreadores', 'Câmeras', 'Veículos', 'Motoristas', 'Cadastro de tags']);
   expect(within(grupo).getByRole('link', { name: 'Câmeras' }).getAttribute('href')).toBe('/cameras');
 });
 it.each([

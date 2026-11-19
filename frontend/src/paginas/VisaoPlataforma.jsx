@@ -68,6 +68,7 @@ const modulos = [
       ['Identidade visual', 'Nome e logotipo da Linktrac e das revendedoras. Após o login, os clientes da carteira veem a marca da revendedora.'],
       ['Espelhamento', 'Consulta autorizada a veículos de outra empresa, com propriedade mantida na empresa de origem.'],
       ['API para sistemas de clientes', 'Chaves por empresa, com permissões e revogação. Permite listar veículos, consultar posição e histórico e atualizar campos básicos do veículo.'],
+      ['Tags BLE para bens e equipamentos', 'Cadastro MAC, iBeacon e Eddystone, vínculo ao receptor, última detecção e auditoria da homologação. Posição aproximada pelo receptor Bluetooth; exige teste do conjunto físico.'],
       ['Integração de equipamentos', 'Recepção de posições, lotes, telemetria e eventos de vídeo por credencial individual ou gateway Traccar, conforme a integração.'],
       ['Briefings e melhorias', 'Importação de conteúdo, geração de propostas e acompanhamento. Os manuais de uso ficam dentro da plataforma.'],
     ],

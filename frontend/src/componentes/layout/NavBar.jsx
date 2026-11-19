@@ -18,6 +18,7 @@ const cadastros = [
  ['/cameras','Câmeras','camera','Cadastros'],
  ['/veiculos','Veículos','veiculo','Cadastros'],
  ['/motoristas','Motoristas','pessoas','Cadastros'],
+ ['/tags-ble','Cadastro de tags','ajustes','Cadastros'],
 ];
 export default function NavBar(){
  const {pathname}=useLocation(); const navigate=useNavigate(); const {user,logout,loading}=useAuth();

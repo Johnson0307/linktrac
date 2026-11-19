@@ -58,4 +58,15 @@ telemetria.rodas = { type: 'array', maxItems: 32, items: { type: 'object', requi
   temperaturaC: { type: 'number', minimum: -60, maximum: 250 },
 } } };
 openapi.paths['/relatorios/resumo-semanal'] = { get: { security: [{ sessao: [] }], responses: resposta } };
+openapi.components.schemas.DeteccoesBle = { type: 'object', required: ['mensagemId','dataHora','tags'], properties: {
+ mensagemId: { type: 'string', maxLength: 100 }, dataHora: { type: 'string', format: 'date-time' },
+ latitude: { type: 'number', minimum: -90, maximum: 90 }, longitude: { type: 'number', minimum: -180, maximum: 180 },
+ tags: { type: 'array', minItems: 1, maxItems: 100, items: { type: 'object', required: ['formato','identificador'], properties: {
+  formato: { type: 'string', enum: ['mac','ibeacon','eddystone'] }, identificador: { type: 'string', description: 'MAC de 12 hexadecimais; UUID:major:minor para iBeacon; Namespace+Instance de 32 hexadecimais para Eddystone UID.' },
+  rssi: { type: 'number', minimum: -127, maximum: 20 }, bateriaV: { type: 'number', minimum: 0, maximum: 6 }, bateriaBaixa: { type: 'boolean' }, temperaturaC: { type: 'number', minimum: -100, maximum: 200 }
+ } } }
+} };
+openapi.paths['/integracao/tags-ble'] = { post: { security: [{ deviceId: [], deviceToken: [] }], description: 'Detecções por receptor ativo autenticado. Atualiza somente tags cadastradas e ativas da mesma empresa, vinculadas ao receptor ou liberadas para qualquer receptor da empresa. Reenvios e leituras antigas não substituem a última detecção. Coordenadas opcionais são do receptor. Não calcula distância pelo RSSI.', requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DeteccoesBle' } } } }, responses: resposta } };
+openapi.paths['/operacao/tags-ble'] = { get: { security: [{ sessao: [] }], description: 'Cadastro e catálogo de referências BLE da empresa. Administrador ou gestor com acesso a equipamentos.', responses: resposta }, post: { security: [{ sessao: [] }], description: 'Cadastro com nome, bem, fabricante, modelo, formato, identificador, receptorId opcional, status, ativo, firmwareTag, firmwareReceptor e observacao. Status: a_testar, em_teste, homologada ou incompativel. A homologação deve ser validada pelo gestor após teste físico.', responses: resposta } };
+disponibilidade.push({ recurso: 'Tags BLE e homologação', status: 'Cadastro, última detecção e auditoria disponíveis. Referências e adaptador Teltonika são sujeitos a teste de hardware e firmware. Outros receptores usam a API normalizada. Não equivale à certificação regulatória.' });
 module.exports = { openapi, disponibilidade };

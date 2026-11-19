@@ -19,6 +19,11 @@ const manutencao = {
   },
 };
 export const manuais = {
+  tagsBle: {
+    titulo: 'Tags BLE e homologação', objetivo: 'Identificar bens, máquinas e equipamentos por um receptor Bluetooth compatível.',
+    uso: ['Abra Cadastros → Cadastro de tags. Escolha um modelo de referência ou informe marca e modelo.', 'Informe o bem e o identificador MAC, iBeacon (UUID:major:minor) ou Eddystone UID (Namespace + Instance). Escolha o receptor compatível.', 'Registre firmware, observações do teste e situação. O gestor confirma a homologação após testar a combinação real.', 'Consulte a última detecção, sinal e bateria quando enviados. O mapa mostra a posição aproximada do receptor. Histórico registra alterações com responsável, data e horário.'],
+    limites: ['Modelos de referência não são homologados automaticamente. Confirme Bluetooth, firmware e formato no manual do receptor; o LV12 não foi validado para essa função.', 'Tags não possuem GPS próprio. RSSI não é convertido em distância. São guardadas a última detecção e a auditoria dos cadastros; não há histórico de deslocamento da tag.', 'Receptores Teltonika com atributos BLE decodificados podem encaminhar detecções. Outros integradores usam POST /api/integracao/tags-ble com as credenciais individuais do receptor, conforme a documentação da API.'],
+  },
   painel: {
     titulo: 'Visão geral e mapa da frota', objetivo: 'Acompanhar a última posição dos veículos autorizados e os indicadores da frota.',
     uso: [
@@ -332,13 +337,13 @@ export const manuais = {
 };
 export const secaoPorRota = {
   '/': 'painel', '/dashboard': 'painel', '/mapa': 'painel', '/minhas-rotas': 'rotasMapa', '/rastreamento': 'rastreamento', '/veiculos': 'veiculos',
-  '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/cameras': 'videotelemetria', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
+  '/tags-ble': 'tagsBle', '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/cameras': 'videotelemetria', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
   '/monitoramento': 'monitoramento', '/agro': 'agro',
   '/usuarios': 'usuarios', '/espelhamentos': 'espelhamentos', '/login': 'login', '/register': 'registro',
 };
 const moduloDeCadastro = {
   veiculos: 'veiculos', rotasMapa: 'entregas', multas: 'operacao', monitoramento: 'operacao',
-  chips: 'equipamentos', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
+  tagsBle: 'equipamentos', chips: 'equipamentos', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
 };
 
 export const podeVerCadastro = (user, secao) => Boolean(user && ['admin', 'gestor'].includes(user.role) &&

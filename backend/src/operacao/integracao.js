@@ -73,6 +73,16 @@ router.post('/posicoes', async (req, res) => {
   if (res.statusCode === 201) await verificarAlimentacao(req, { dataHora: req.body.dataHora, telemetria: req.body.telemetria }, res);
   if (res.statusCode < 300) await registrarRecepcao(req, res.statusCode === 201 ? req.body : undefined, true);
 });
+router.post('/tags-ble', async (req, res) => {
+  try {
+    const dados = await require('./tagsBle').receberDeteccoes(req.dispositivo, req.body);
+    await registrarRecepcao(req);
+    return res.json({ sucesso: true, dados });
+  } catch (erro) {
+    return res.status(erro.status || 503).json({ sucesso: false,
+      mensagem: erro.status ? erro.message : 'Não foi possível receber as detecções BLE.' });
+  }
+});
 router.post('/lote', async (req, res) => {
   const items = req.body?.posicoes;
   if (!Array.isArray(items) || !items.length || items.length > 100 || items.some((p) => !valido(p))) return res.status(400).json({ sucesso: false, mensagem: 'Envie de 1 a 100 posições com dataHora e mensagemId.' });
@@ -105,6 +115,12 @@ router.post(['/traccar', '/traccar-gerenciado'], async (req, res) => {
       });
     }
     return res.status(400).json({ sucesso: false, mensagem: e.message });
+  }
+  try {
+    await require('./tagsBle').receberTraccar(req.dispositivo, req.body.position);
+  } catch (erro) {
+    return res.status(erro.status || 503).json({ sucesso: false,
+      mensagem: erro.status ? erro.message : 'Recepção BLE temporariamente indisponível.' });
   }
   if (body.semGPS) {
     await verificarAlimentacao(req, body, res);

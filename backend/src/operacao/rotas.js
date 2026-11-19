@@ -56,6 +56,7 @@ router.get('/arquivo-historico', async (req, res) => {
   }
 });
 router.use('/dispositivos', require('./dispositivos'));
+router.use('/tags-ble', require('./tagsBle').router);
 router.use('/chips', require('./chips').router);
 router.put('/configuracoes', async (req, res) => {
   const resultado = validarConfig(req.body);
