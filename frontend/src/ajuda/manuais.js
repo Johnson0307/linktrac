@@ -19,6 +19,11 @@ const manutencao = {
   },
 };
 export const manuais = {
+  jornada: {
+    titulo: 'Jornada de trabalho e integração com ponto', objetivo: 'Preparar a conexão com o fornecedor de ponto da empresa e o vínculo dos motoristas.',
+    uso: ['Abra Gestão → Jornada de trabalho. Em Configuração do fornecedor, escolha a empresa de ponto que você já utiliza.', 'O administrador informa a liberação somente após confirmação do fornecedor. Para Sólides, o token é salvo criptografado se a proteção estiver configurada no servidor. Nunca envie o token por mensagem.', 'O teste disponível consulta apenas o acesso inicial da Sólides. Não confirma o plano, a API de marcações nem o registro de ponto oficial.', 'Vincule o motorista ao ID ou identificador externo do colaborador no fornecedor. É um vínculo preparatório, sujeito à validação na primeira sincronização.'],
+    limites: ['Esta versão não sincroniza marcações, não calcula horas trabalhadas e não coleta ponto oficial. O funcionário continua usando o aplicativo do fornecedor.', 'Sólides está em preparação. VR/Pontomais, Pontotel, Oitchau, Senior e Outro registram a preferência; seus conectores dependem de documentação e implementação.', 'Cada empresa tem configuração e vínculos próprios. Trocar de fornecedor remove o token anterior; vínculos anteriores ficam preservados e separados por fornecedor.', 'Custos, API no plano gratuito, retenção e autorização para uso por clientes da Linktrac dependem da resposta e das condições do fornecedor.'],
+  },
   tagsBle: {
     titulo: 'Tags BLE e homologação', objetivo: 'Identificar bens, máquinas e equipamentos por um receptor Bluetooth compatível.',
     uso: ['Abra Cadastros → Cadastro de tags. Escolha um modelo de referência ou informe marca e modelo.', 'Informe o bem e o identificador MAC, iBeacon (UUID:major:minor) ou Eddystone UID (Namespace + Instance). Escolha o receptor compatível.', 'Registre firmware, observações do teste e situação. O gestor confirma a homologação após testar a combinação real.', 'Consulte a última detecção, sinal e bateria quando enviados. O mapa mostra a posição aproximada do receptor. Histórico registra alterações com responsável, data e horário.'],
@@ -337,13 +342,13 @@ export const manuais = {
 };
 export const secaoPorRota = {
   '/': 'painel', '/dashboard': 'painel', '/mapa': 'painel', '/minhas-rotas': 'rotasMapa', '/rastreamento': 'rastreamento', '/veiculos': 'veiculos',
-  '/tags-ble': 'tagsBle', '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/cameras': 'videotelemetria', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
+  '/jornada': 'jornada', '/tags-ble': 'tagsBle', '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/cameras': 'videotelemetria', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
   '/monitoramento': 'monitoramento', '/agro': 'agro',
   '/usuarios': 'usuarios', '/espelhamentos': 'espelhamentos', '/login': 'login', '/register': 'registro',
 };
 const moduloDeCadastro = {
   veiculos: 'veiculos', rotasMapa: 'entregas', multas: 'operacao', monitoramento: 'operacao',
-  tagsBle: 'equipamentos', chips: 'equipamentos', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
+  jornada: 'operacao', tagsBle: 'equipamentos', chips: 'equipamentos', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
 };
 
 export const podeVerCadastro = (user, secao) => Boolean(user && ['admin', 'gestor'].includes(user.role) &&

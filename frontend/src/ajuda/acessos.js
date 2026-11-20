@@ -19,6 +19,7 @@ export function permiteRota(user, pathname) {
     return ['admin', 'gestor'].includes(user?.role) && permite(user, 'equipamentos');
   }
   if (pathname === '/monitoramento') return ['admin', 'gestor', 'operador'].includes(user?.role) && permite(user, 'operacao');
+  if (pathname === '/jornada') return ['admin', 'gestor'].includes(user?.role) && permite(user, 'operacao');
   if (pathname === '/agro') return ['admin', 'gestor'].includes(user?.role) && permite(user, 'operacao');
   if (pathname === '/historicos') return ['rastreamento', 'manutencao', 'usuarios'].some(modulo => permite(user, modulo));
   if (pathname === '/marca') return permite(user, 'marca', true);

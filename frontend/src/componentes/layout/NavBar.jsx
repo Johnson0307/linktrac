@@ -9,7 +9,7 @@ import './NavBar.css';
 const itens = [
  ['/', 'Visão geral', 'painel', 'Operação'], ['/mapa','Mapa geral','mapa','Operação'], ['/rastreamento','Rastreamento','mapa','Operação'],
  ['/monitoramento','Central de monitoramento','painel','Operação'], ['/agro','Agro e talhões','mapa','Operação'],
- ['/historicos','Históricos','historico','Operação'], ['/manutencao','Manutenção','ferramenta','Gestão'],
+ ['/historicos','Históricos','historico','Operação'], ['/manutencao','Manutenção','ferramenta','Gestão'], ['/jornada','Jornada de trabalho','historico','Gestão'],
  ['/relatorios','Relatórios','relatorio','Relatórios'],
  ['/configuracoes','Configurações','ajustes','Administração'], ['/manuais','Manuais','relatorio','Ajuda']
 ];

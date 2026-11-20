@@ -49,6 +49,7 @@ function regraApi(caminho, metodo) {
   if (caminho === '/painel/rota' && metodo === 'POST') return { modulos: ['rastreamento'] };
   if (grupo === 'painel' || grupo === 'rastreamento') return { modulos: ['rastreamento'], alterar: !leitura };
   if (grupo === 'historicos') return { modulos: [area === 'acoes' ? 'usuarios' : item === 'manutencoes' ? 'manutencao' : 'rastreamento'], alterar: !leitura };
+  if (grupo === 'jornada') return { modulos: ['operacao'], alterar: !leitura };
   if (grupo === 'assistente-manutencao') return { modulos: ['manutencao'], alterar: !leitura };
   if (grupo === 'veiculos' && area === 'opcoes' && leitura) return { modulos: ['veiculos', 'rastreamento', 'manutencao'] };
   if (grupo === 'relatorios') return { modulos: leitura || metodo === 'POST' && ['consultar', 'csv', 'trajeto'].includes(area) ? ['relatorios'] : [] };
