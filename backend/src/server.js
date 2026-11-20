@@ -53,6 +53,8 @@ app.use('/api/cliente', clienteRoutes);
 app.use('/api/espelhamentos', require('./routes/espelhamentoRoutes'));
 app.use('/api/historicos', require('./routes/historicosRoutes'));
 app.use('/api/painel', require('./routes/painelRoutes'));
+app.use('/api/familia', require('./familia/rotas').web);
+app.use('/api/familia-dispositivo', require('./familia/rotas').aparelho);
 app.use('/api/jornada', require('./routes/jornadaRoutes'));
 app.use('/api/motoristas', require('./routes/motoristaRoutes'));
 app.use('/api/assistente-manutencao', require('./operacao/agenteRotas').router);

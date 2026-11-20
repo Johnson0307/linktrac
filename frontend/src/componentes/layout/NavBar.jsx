@@ -8,7 +8,7 @@ import { permiteRota } from '../../ajuda/acessos';
 import './NavBar.css';
 const itens = [
  ['/', 'Visão geral', 'painel', 'Operação'], ['/mapa','Mapa geral','mapa','Operação'], ['/rastreamento','Rastreamento','mapa','Operação'],
- ['/monitoramento','Central de monitoramento','painel','Operação'], ['/agro','Agro e talhões','mapa','Operação'],
+ ['/pessoas','Pessoas e família','pessoas','Operação'], ['/monitoramento','Central de monitoramento','painel','Operação'], ['/agro','Agro e talhões','mapa','Operação'],
  ['/historicos','Históricos','historico','Operação'], ['/manutencao','Manutenção','ferramenta','Gestão'], ['/jornada','Jornada de trabalho','historico','Gestão'],
  ['/relatorios','Relatórios','relatorio','Relatórios'],
  ['/configuracoes','Configurações','ajustes','Administração'], ['/manuais','Manuais','relatorio','Ajuda']
@@ -28,6 +28,7 @@ export default function NavBar(){
  useEffect(()=>{if(!aberto)return undefined;const fechar=e=>{if(e.key==='Escape')setAberto(false)};window.addEventListener('keydown',fechar);return()=>window.removeEventListener('keydown',fechar)},[aberto]);
  const menu=[...itens,...(user?.role==='admin'?[['/clientes','Clientes','pessoas','Cadastros']]:[]),...cadastros,...(['admin','gestor','motorista'].includes(user?.role)?[['/tms','Roteirização de entregas','carga','Operação'],['/minhas-rotas',user.role==='motorista'?'Minhas rotas':'Rotas atribuídas','mapa','Operação']]:[]),...(['admin','gestor'].includes(user?.role)?[['/manutencao-inteligente','Manutenção inteligente','ferramenta','Gestão'],['/operacao','Central operacional','ajustes','Gestão'],['/usuarios','Usuários','pessoas','Administração']]:[]),...(marca.podeEditar?[['/marca','Identidade visual','ajustes','Administração']]:[]),...(user?.podeGerenciarEspelhamentos?[['/espelhamentos','Espelhamentos','compartilhar','Administração'],['/briefings','Briefings e melhorias','relatorio','Administração']]:[])].filter(([path])=>permiteRota(user,path));
  const tituloEspecial = {
+   '/pessoas/verificacoes': 'Conferência de responsáveis e vínculos',
    '/visao-plataforma': 'Visão geral da plataforma',
    '/resumo-semanal': 'Resumo semanal',
    '/tms/cargas': 'Gestão de cargas',

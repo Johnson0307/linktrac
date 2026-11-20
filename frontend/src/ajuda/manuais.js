@@ -19,6 +19,11 @@ const manutencao = {
   },
 };
 export const manuais = {
+  familia: {
+    titulo: 'Pessoas e família', objetivo: 'Acompanhar menores por localização compartilhada com o responsável verificado.',
+    uso: ['Abra Pessoas e família e cadastre nome, nascimento e contato do responsável. A equipe precisa conferir identidade, maioridade e contato.', 'Adicione o menor, informe seu vínculo e leia o termo específico. O aceite fica associado à conta, ao menor, à versão, hash e horário do servidor; não é assinatura qualificada ICP-Brasil.', 'Solicite a conferência do vínculo à Linktrac. A declaração sozinha não aprova o cadastro. A análise precisa ser feita por outro administrador autorizado.', 'Após aprovação e autorização, use Adicionar ou trocar aparelho. O código expira em 15 minutos, serve uma vez e substitui o aparelho anterior.', 'No aparelho acompanhado, abra Página do aparelho, digite o código e o nome do celular. Toque em Iniciar compartilhamento e permita o GPS. O envio pode ser interrompido no próprio aparelho.', 'Consulte o mapa e até 500 posições recentes dentro de 14 dias. As consultas de localização são auditadas. Revogar interrompe o envio e remove as posições do banco ativo. Excluir cadastro também remove a identificação do menor.'],
+    limites: ['Somente o titular da conta vê as próprias pessoas. A análise cadastral não dá acesso a coordenadas. O módulo é independente dos veículos e deve ser liberado pela administração para cada empresa.', 'Esta é uma versão web para página aberta e ativa. Não há aplicativo nativo, garantia de segundo plano ou rastreamento com tela bloqueada. O acesso do aparelho fica somente na aba; fechá-la pode exigir novo pareamento.', 'A verificação é manual. Não há consulta automática a documentos, reconhecimento facial, SMS de confirmação ou validação automática de responsabilidade legal.', 'A coleta usa somente GPS permitido no aparelho. Não há localização por número de telefone/IMEI, compartilhamento público, convite a outros responsáveis, SOS ou alertas de cerca nesta versão.', 'Posições têm retenção de até 14 dias da coleta e não são exibidas após expirar, mesmo antes da limpeza TTL. Auditoria específica sem coordenadas: 180 dias. Cópias de segurança exigem ciclo restrito e reaplicação das revogações em restaurações.', 'Ao atingir 18 anos, a coleta e consulta por este fluxo ficam bloqueadas. Termo e procedimentos precisam de validação jurídica e operacional antes de atendimento comercial de pessoas reais.'],
+  },
   jornada: {
     titulo: 'Jornada de trabalho e integração com ponto', objetivo: 'Preparar a conexão com o fornecedor de ponto da empresa e o vínculo dos motoristas.',
     uso: ['Abra Gestão → Jornada de trabalho. Em Configuração do fornecedor, escolha a empresa de ponto que você já utiliza.', 'O administrador informa a liberação somente após confirmação do fornecedor. Para Sólides, o token é salvo criptografado se a proteção estiver configurada no servidor. Nunca envie o token por mensagem.', 'O teste disponível consulta apenas o acesso inicial da Sólides. Não confirma o plano, a API de marcações nem o registro de ponto oficial.', 'Vincule o motorista ao ID ou identificador externo do colaborador no fornecedor. É um vínculo preparatório, sujeito à validação na primeira sincronização.'],
@@ -342,13 +347,13 @@ export const manuais = {
 };
 export const secaoPorRota = {
   '/': 'painel', '/dashboard': 'painel', '/mapa': 'painel', '/minhas-rotas': 'rotasMapa', '/rastreamento': 'rastreamento', '/veiculos': 'veiculos',
-  '/jornada': 'jornada', '/tags-ble': 'tagsBle', '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/cameras': 'videotelemetria', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
+  '/pessoas': 'familia', '/pessoas/aparelho': 'familia', '/pessoas/verificacoes': 'familia', '/jornada': 'jornada', '/tags-ble': 'tagsBle', '/operacao': 'operacao', '/rastreadores': 'equipamentos', '/cameras': 'videotelemetria', '/motoristas': 'motoristas', '/relatorios': 'relatorios', '/tms': 'tms', '/configuracoes': 'configuracoes',
   '/monitoramento': 'monitoramento', '/agro': 'agro',
   '/usuarios': 'usuarios', '/espelhamentos': 'espelhamentos', '/login': 'login', '/register': 'registro',
 };
 const moduloDeCadastro = {
   veiculos: 'veiculos', rotasMapa: 'entregas', multas: 'operacao', monitoramento: 'operacao',
-  jornada: 'operacao', tagsBle: 'equipamentos', chips: 'equipamentos', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
+  familia: 'familia', jornada: 'operacao', tagsBle: 'equipamentos', chips: 'equipamentos', equipamentos: 'equipamentos', videotelemetria: 'equipamentos',
 };
 
 export const podeVerCadastro = (user, secao) => Boolean(user && ['admin', 'gestor'].includes(user.role) &&

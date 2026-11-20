@@ -10,7 +10,7 @@ function controlarAcessos(req, res, next) {
   let caminho;
   try { caminho = decodeURIComponent(req.path).toLowerCase().replace(/\/+$/, ''); }
   catch { return res.status(400).json({ sucesso: false, mensagem: 'Endereço inválido.' }); }
-  if (rotasPublicas.has(caminho) || caminho.startsWith('/integracao/') ||
+  if (rotasPublicas.has(caminho) || caminho.startsWith('/integracao/') || caminho.startsWith('/familia-dispositivo/') ||
       (caminho === '/rastreamento' && req.method === 'POST')) return next();
 
   return authenticate(req, res, async () => {

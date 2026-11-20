@@ -1,6 +1,7 @@
 const modulos = [
   { id: 'rastreamento', nome: 'Mapa, rastreamento e histórico de posições' },
   { id: 'veiculos', nome: 'Cadastro de veículos', edita: true },
+  { id: 'familia', nome: 'Pessoas e família (cadastros da própria conta)', edita: true },
   { id: 'motoristas', nome: 'Motoristas', edita: true },
   { id: 'manutencao', nome: 'Manutenção e análise técnica', edita: true },
   { id: 'relatorios', nome: 'Relatórios, resumo semanal e KML' },
@@ -49,6 +50,7 @@ function regraApi(caminho, metodo) {
   if (caminho === '/painel/rota' && metodo === 'POST') return { modulos: ['rastreamento'] };
   if (grupo === 'painel' || grupo === 'rastreamento') return { modulos: ['rastreamento'], alterar: !leitura };
   if (grupo === 'historicos') return { modulos: [area === 'acoes' ? 'usuarios' : item === 'manutencoes' ? 'manutencao' : 'rastreamento'], alterar: !leitura };
+  if (grupo === 'familia') return { modulos: ['familia'], alterar: !leitura };
   if (grupo === 'jornada') return { modulos: ['operacao'], alterar: !leitura };
   if (grupo === 'assistente-manutencao') return { modulos: ['manutencao'], alterar: !leitura };
   if (grupo === 'veiculos' && area === 'opcoes' && leitura) return { modulos: ['veiculos', 'rastreamento', 'manutencao'] };

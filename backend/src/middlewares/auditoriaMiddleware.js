@@ -1,5 +1,7 @@
 const Acao = require('../models/AcaoUsuario');
 exports.auditar = (req, res, next) => {
+  // Este módulo mantém auditoria própria e retenção específica, sem coordenadas ou nomes de menores.
+  if (/^\/api\/familia(?:\/|$)/i.test((req.originalUrl || '').split('?')[0])) return next();
   const json = res.json.bind(res);
   res.json = async (body) => {
     const usuario = req.user || (req.originalUrl?.split('?')[0] === '/api/auth/login' ? body?.dados?.usuario : null);

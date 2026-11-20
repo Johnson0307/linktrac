@@ -27,6 +27,9 @@ import ProtectedRoute from './componentes/ProtectedRoute.jsx';
 import { MarcaProvider } from './contexts/MarcaContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
+const PessoasFamilia = lazy(() => import('./paginas/PessoasFamilia'));
+const AparelhoFamilia = lazy(() => import('./paginas/AparelhoFamilia'));
+const VerificacoesFamilia = lazy(() => import('./paginas/VerificacoesFamilia'));
 const Jornada = lazy(() => import('./paginas/Jornada'));
 const TagsBle = lazy(() => import('./paginas/TagsBle'));
 const ResumoSemanal = lazy(() => import('./paginas/ResumoSemanal'));
@@ -53,6 +56,7 @@ function App() {
         <Conteudo>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/pessoas/aparelho" element={<Suspense fallback={<p>Carregando aparelho...</p>}><AparelhoFamilia /></Suspense>} />
             <Route path="/register" element={<Register />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/tms" element={<Suspense fallback={<p>Carregando roteirização...</p>}><Tms /></Suspense>} />
@@ -70,6 +74,8 @@ function App() {
               <Route path="/rastreamento" element={<Rastreamento />} />
               <Route path="/veiculos" element={<Veiculos />} />
               <Route path="/rastreadores" element={<CentralOperacao inicial="dispositivos" />} />
+              <Route path="/pessoas" element={<Suspense fallback={<p>Carregando pessoas...</p>}><PessoasFamilia /></Suspense>} />
+              <Route path="/pessoas/verificacoes" element={<Suspense fallback={<p>Carregando análises...</p>}><VerificacoesFamilia /></Suspense>} />
               <Route path="/jornada" element={<Suspense fallback={<p role="status">Carregando jornada...</p>}><Jornada /></Suspense>} />
               <Route path="/tags-ble" element={<Suspense fallback={<p role="status">Carregando tags...</p>}><TagsBle /></Suspense>} />
               <Route path="/cameras" element={<CadastroCameras />} />
