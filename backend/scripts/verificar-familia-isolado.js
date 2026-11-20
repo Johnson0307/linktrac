@@ -55,7 +55,33 @@ async function main() {
     checar((await req('familia/verificacoes/responsavel/'+ra._id,{user:revisor,body:prova})).status===200,'Conferência sintética do responsável');
     checar((await req('familia/verificacoes/menor/'+mid,{user:revisor,body:{...prova,vinculo:false}})).status===400,'Conferência sem vínculo recusada');
     checar((await req('familia/verificacoes/menor/'+mid,{user:revisor,body:prova})).status===200,'Conferência sintética do vínculo');
+    // Autorização adicional do app: o aceite da página web não amplia a coleta.
+    const codigoApp=await req('familia/menores/'+mid+'/codigo',{user:ua,body:{}});
+    delete process.env.FAMILIA_APP_HABILITADO;
+    checar((await req('familia-dispositivo/app-info')).dados.appDisponivel===false,'App fechado por padrão');
+    const pedidoApp={codigo:codigoApp.dados.codigo,nomeAparelho:'APP SINTETICO',modalidade:'app'};
+    checar((await req('familia-dispositivo/parear',{body:pedidoApp})).status===426,'App desligado não consome código');
+    process.env.FAMILIA_APP_HABILITADO='1';
+    checar((await req('familia-dispositivo/parear',{body:pedidoApp})).status===403,'Termo web não autoriza app');
+    const termoApp=(await req('familia',{user:ua})).dados.termoApp;
+    const aceiteApp={aceito:true,cienteMenor:true,versao:termoApp.versao,hash:termoApp.hash};
+    checar((await req('familia/menores/'+mid+'/autorizar-app',{user:ub,body:aceiteApp})).status===404,'Outra conta não autoriza app');
+    checar((await req('familia/menores/'+mid+'/autorizar-app',{user:ua,body:{...aceiteApp,hash:'antigo'}})).status===400,'Hash antigo do termo app recusado');
+    checar((await req('familia/menores/'+mid+'/autorizar-app',{user:ua,body:aceiteApp})).status===200,'Aceite adicional sintético do app');
+    const appPareado=await req('familia-dispositivo/parear',{body:pedidoApp});
+    checar(appPareado.status===200,'App pareado após aprovação e autorização adicional');
+    const tokenApp=appPareado.dados.token;
+    checar((await req('familia-dispositivo/status',{token:tokenApp})).dados.autorizacaoApp===true,'App reconhece autorização própria');
+    checar((await req('familia-dispositivo/iniciar',{token:tokenApp,body:{}})).status===200,'App inicia explicitamente');
+    const pontoApp={mensagemId:'app-sintetico',latitude:0,longitude:0,precisao:10,dataHora:new Date(Date.now()+1000).toISOString()};
+    checar((await req('familia-dispositivo/posicoes',{token:tokenApp,body:{pontos:[pontoApp]}})).dados.novas===1,'App envia ao mesmo histórico privado');
+    delete process.env.FAMILIA_APP_HABILITADO;
+    checar((await req('familia-dispositivo/status',{token:tokenApp})).status===426,'Desligamento da função bloqueia o app');
+    checar((await req('familia-dispositivo/pausar',{token:tokenApp,body:{}})).status===200,'Pausa permanece acessível com app desligado');
+    await Posicao.deleteMany({menorId:mid}); // Somente pontos sintéticos deste banco descartável.
+    process.env.FAMILIA_APP_HABILITADO='1';
     const codigo=await req('familia/menores/'+mid+'/codigo',{user:ua,body:{}});checar(codigo.status===200,'Emissão de código temporário');
+    checar((await req('familia-dispositivo/status',{token:tokenApp})).status===401,'Novo código invalida o app anterior');
     const pares=await Promise.all([1,2].map(()=>req('familia-dispositivo/parear',{body:{codigo:codigo.dados.codigo,nomeAparelho:'APARELHO SINTETICO'}})));
     checar(pares.filter(p=>p.status===200).length===1,'Código consumido uma única vez em concorrência');
     const token=pares.find(p=>p.status===200).dados.token;

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { randomBytes, randomUUID } = require('node:crypto');
 const { Responsavel, Pessoa, Posicao, Auditoria, Limite } = require('./modelos');
 const R = require('./regras');
+const A = require('./app');
 const { authenticate } = require('../middlewares/authMiddleware');
 const { adminDaLinktrac } = require('../middlewares/linktracMiddleware');
 const { permite } = require('../services/acessosCliente');
@@ -49,7 +50,8 @@ web.get('/',seguro(async req=>{
   const consultas=publicas.filter(p=>p.ultimaPosicao);
   if(consultas.length)await Auditoria.insertMany(consultas.map(p=>({...escopo(req),menorId:p._id,por:req.user.id,acao:'consulta_mapa'})));
   return {responsavel:r?{_id:r._id,nome:r.nome,nascimento:r.nascimento,contato:r.contato,verificacao:r.verificacao.estado}:null,
-    pessoas:publicas,termo:R.termo,podeAnalisar:adminDaLinktrac(req.user)};
+    pessoas:publicas.map((p,i)=>({...p,autorizacaoApp:A.autorizadoApp(pessoas[i])})),termo:R.termo,
+    termoApp:A.termoApp,appDisponivel:A.appDisponivel(),podeAnalisar:adminDaLinktrac(req.user)};
 }));
 web.post('/responsavel',seguro(async req=>{
   const dados=R.validarResponsavel(req.body);
@@ -82,6 +84,17 @@ web.post('/menores/:id/autorizar',seguro(async req=>{
     await p.save({session});
     await auditar({...escopo(req),menorId:p._id,por:req.user.id,acao:'aceite_termo',versao:R.termo.versao,hash:R.termo.hash},session);
     return {autorizacaoRegistrada:true,pareamentoDependeDeVerificacao:true};
+  });
+}));
+web.post('/menores/:id/autorizar-app',seguro(async req=>{
+  if(!A.appDisponivel())R.falhar('O aplicativo ainda está em preparação para testes.',426);
+  if(req.body?.aceito!==true||req.body?.cienteMenor!==true||req.body?.versao!==A.termoApp.versao||req.body?.hash!==A.termoApp.hash)R.falhar('Leia e aceite a autorização específica do aplicativo.');
+  return mongoose.connection.transaction(async session=>{
+    const r=await dono(req,session),p=await filho(req,session);R.exigirAutorizacao(r,p);
+    p.consentimentoApp={versao:A.termoApp.versao,hash:A.termoApp.hash,aceitoEm:new Date(),por:req.user.id};
+    await p.save({session});
+    await auditar({...escopo(req),menorId:p._id,por:req.user.id,acao:'aceite_app',versao:A.termoApp.versao,hash:A.termoApp.hash},session);
+    return {autorizacaoAppRegistrada:true};
   });
 }));
 web.post('/menores/:id/codigo',seguro(async req=>{
@@ -163,17 +176,21 @@ async function elegivel(p,session){
   const esc=await escopoEmpresa(c);if(!u||!esc||!permite(esc.acessos,'familia',true))R.falhar('Acompanhamento indisponível.',403);
   return r;
 }
+aparelho.get('/app-info',seguro(async()=>({appDisponivel:A.appDisponivel(),versaoProtocolo:1})));
 aparelho.post('/parear',seguro(async req=>{
   await limite('parear:'+req.ip,20);
+  const modalidade=req.body?.modalidade??'web';
+  if(!['web','app'].includes(modalidade))R.falhar('Modalidade de aparelho inválida.');
   const codigo=typeof req.body?.codigo==='string'?req.body.codigo.replace(/-/g,'').toUpperCase():'';
   if(!/^[A-F0-9]{12}$/.test(codigo))R.falhar('Código inválido ou expirado.');
   const nome=R.campo(req.body?.nomeAparelho,'o nome do aparelho',80);
   return mongoose.connection.transaction(async session=>{
     const agora=new Date();const p=await Pessoa.findOne({codigoHash:R.hash(codigo),codigoExpiraEm:{$gt:agora},ativo:true}).session(session);
     if(!p)R.falhar('Código inválido ou expirado.');await elegivel(p,session);
+    if(modalidade==='app')A.exigirApp(p);
     const token=randomBytes(32).toString('hex');
     const atualizado=await Pessoa.findOneAndUpdate({_id:p._id,codigoHash:R.hash(codigo),codigoExpiraEm:{$gt:agora}},
-      {$set:{tokenHash:R.hash(token),tokenExpiraEm:new Date(Date.now()+90*86400000),aparelhoNome:nome,pareadoEm:agora,pausado:true},$unset:{codigoHash:'',codigoExpiraEm:''}},{session,new:true});
+      {$set:{tokenHash:R.hash(token),tokenExpiraEm:new Date(Date.now()+90*86400000),aparelhoNome:nome,aparelhoModo:modalidade,pareadoEm:agora,pausado:true},$unset:{codigoHash:'',codigoExpiraEm:''}},{session,new:true});
     if(!atualizado)R.falhar('Código já utilizado.',409);
     await auditar({clienteId:p.clienteId,usuarioId:p.usuarioId,menorId:p._id,acao:'pareamento'},session);
     return {token,nome:p.nome.split(' ')[0],aviso:'Compartilhamento com o responsável. A localização só começa após tocar em Iniciar e permitir o GPS.'};
@@ -184,11 +201,15 @@ async function autenticarAparelho(req,res,next){
     const token=req.headers.authorization?.match(/^Bearer ([a-f0-9]{64})$/i)?.[1];if(!token)R.falhar('Aparelho não autorizado.',401);
     const p=await Pessoa.findOne({tokenHash:R.hash(token),tokenExpiraEm:{$gt:new Date()},ativo:true}).select('+tokenHash');
     if(!p)R.falhar('Aparelho não autorizado. Solicite novo pareamento.',401);
-    await elegivel(p);await limite('aparelho:'+p._id,60);req.pessoaFamilia=p;next();
+    await elegivel(p);
+    // Pausar/desparear continuam disponíveis mesmo quando o módulo nativo é desligado.
+    if(p.aparelhoModo==='app'&&!['/pausar','/desparear'].includes(req.path.toLowerCase()))A.exigirApp(p);
+    await limite('aparelho:'+p._id,60);req.pessoaFamilia=p;next();
   }catch(e){res.status(e.status||503).json({sucesso:false,mensagem:e.status?e.message:'Não foi possível verificar a autorização.'});}
 }
 aparelho.use(autenticarAparelho);
 aparelho.get('/status',seguro(async req=>({nome:req.pessoaFamilia.nome.split(' ')[0],pausado:req.pessoaFamilia.pausado,
+  appDisponivel:A.appDisponivel(),autorizacaoApp:req.pessoaFamilia.aparelhoModo==='app'&&A.autorizadoApp(req.pessoaFamilia),
   retencaoDias:14,aviso:'Seu responsável pode consultar a localização compartilhada. Você pode interromper o compartilhamento neste aparelho.'})));
 aparelho.post('/iniciar',seguro(async req=>{
   const p=req.pessoaFamilia;
@@ -218,6 +239,7 @@ aparelho.post('/posicoes',seguro(async req=>{
   return mongoose.connection.transaction(async session=>{
     const p=await Pessoa.findOne({_id:auth._id,tokenHash:auth.tokenHash,geracao:auth.geracao,ativo:true,pausado:false}).session(session);
     if(!p)R.falhar('Compartilhamento interrompido ou pareamento alterado.',409);await elegivel(p,session);
+    if(p.aparelhoModo==='app')A.exigirApp(p);
     const pontos=R.validarPontos(req.body,p);
     // Toda ingestão escreve no mesmo documento que a revogação/suspensão, evitando a corrida entre ambas.
     const bloqueio=await Pessoa.updateOne({_id:p._id,geracao:p.geracao,pausado:false},{$inc:{revisaoPosicoes:1},$set:{ultimaRecepcao:new Date()}},{session});

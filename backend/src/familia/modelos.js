@@ -16,6 +16,8 @@ const pessoaSchema = new mongoose.Schema({
   nome: { type: String, required: true }, nascimento: { type: String, required: true }, vinculo: { type: String, enum: ['pai','mae','responsavel_legal'], required: true },
   verificacao: { type: verificacao, default: () => ({}) },
   consentimento: { versao: String, hash: String, aceitoEm: Date, por: oid, revogadoEm: Date },
+  consentimentoApp: { versao: String, hash: String, aceitoEm: Date, por: oid },
+  aparelhoModo: { type: String, enum: ['web','app'], default: 'web' },
   ativo: { type: Boolean, default: true }, geracao: { type: String, default: randomUUID },
   codigoHash: { type: String, select: false }, codigoExpiraEm: Date,
   tokenHash: { type: String, select: false }, tokenExpiraEm: Date,

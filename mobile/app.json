@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Linktrac Família",
+    "slug": "linktrac-familia",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "linktracfamilia",
+    "icon": "./assets/linktrac-logo.jpeg",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.linktrac.familia",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "br.com.linktrac.familia",
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.READ_CONTACTS",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "./plugins/withShortCmakePaths.js",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Permita a localização para compartilhar com seu responsável autorizado na Linktrac.",
+          "locationAlwaysAndWhenInUsePermission": "Durante o compartilhamento, a Linktrac envia a localização ao seu responsável mesmo com a tela bloqueada. Você pode interromper no aplicativo.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ]
+    ]
+  }
+}

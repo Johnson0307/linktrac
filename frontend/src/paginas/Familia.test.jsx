@@ -29,6 +29,16 @@ it('consulta sem configurar não mostra cadastro nem ações de autorização',a
  render(<MemoryRouter><PessoasFamilia/></MemoryRouter>);await screen.findByText('MENOR SINTETICO');
  expect(screen.queryByRole('button',{name:'Ler e autorizar'})).toBeNull();expect(screen.queryByRole('button',{name:'Excluir cadastro'})).toBeNull();
 });
+it('app exige um aceite separado, sem marcar caixas automaticamente',async()=>{
+ useAuth.mockReturnValue({user});const d=base();d.appDisponivel=true;d.termoApp={texto:'Termo adicional sintético de segundo plano.',versao:'app-v1',hash:'app-hash'};d.pessoas[0].autorizado=true;
+ api.get.mockResolvedValue({data:{dados:d}});api.post.mockResolvedValue({data:{dados:{}}});api.post.mockClear();
+ render(<MemoryRouter><PessoasFamilia/></MemoryRouter>);await screen.findByText('MENOR SINTETICO');
+ fireEvent.click(screen.getByRole('button',{name:'Autorizar aplicativo em segundo plano'}));
+ expect(screen.getByText(d.termoApp.texto)).toBeTruthy();expect(screen.getByRole('button',{name:'Registrar autorização'}).disabled).toBe(true);
+ fireEvent.click(screen.getByLabelText(/Declaro o vínculo informado/));fireEvent.click(screen.getByLabelText(/Expliquei ou explicarei/));
+ fireEvent.click(screen.getByRole('button',{name:'Registrar autorização'}));
+ await waitFor(()=>expect(api.post).toHaveBeenCalledWith('/familia/menores/menor-a/autorizar-app',{aceito:true,cienteMenor:true,versao:'app-v1',hash:'app-hash'}));
+});
 it('sem pareamento a página não solicita GPS nem envia localização',()=>{
  const geo={getCurrentPosition:vi.fn(),watchPosition:vi.fn(),clearWatch:vi.fn()};Object.defineProperty(navigator,'geolocation',{configurable:true,value:geo});
  vi.stubGlobal('fetch',vi.fn());render(<AparelhoFamilia/>);

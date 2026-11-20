@@ -19,7 +19,23 @@ somente em sessionStorage da aba; não há coordenadas em armazenamento permanen
 Fila temporária em memória, no máximo 200 pontos, não equivale a armazenamento offline durável.
 Nenhum link contém token ou código. O termo é aceite eletrônico autenticado, não assinatura ICP-Brasil.
 
-## Privacidade e acesso
+## Aplicativo Linktrac Família (Android/iOS) — preparação do piloto
+
+O diretório `mobile` contém o aplicativo de base compartilhada com localização nativa em segundo plano.
+Não confundir os bundles JavaScript com um instalador assinado ou com validação em aparelho real.
+A versão web segue funcionando como descrita acima. O backend só libera pareamento nativo quando
+`FAMILIA_APP_HABILITADO=1` e quando o responsável registra o termo adicional específico de segundo
+plano pela própria conta. O aceite web existente não autoriza essa ampliação automaticamente.
+
+No celular do menor, instalar o app Linktrac Família, digitar o código de **Adicionar ou trocar aparelho**
+e um nome livre, como **Celular do João**. O nome não é telefone, IMEI nem senha. O responsável
+acompanha pela própria conta; o WhatsApp não realiza o rastreamento. Na alternativa web, o menor
+abre https://linktracbrasiliaprime.com.br/pessoas/aparelho e mantém a página aberta e ativa.
+
+Instruções de geração, instalação, armazenamento local protegido, limites de coleta, testes e
+requisitos de distribuição: `mobile/README.md`. A liberação comercial e os testes físicos estão pendentes.
+
+## Privacidade e acesso (comum às modalidades)
 
 - Módulo familia separado dos módulos de veículos, controlado por empresa/revenda.
 - Todo cadastro, consulta e histórico filtra clienteId + usuarioId da sessão; não aceita proprietário do corpo.

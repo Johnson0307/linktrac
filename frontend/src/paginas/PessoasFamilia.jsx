@@ -15,6 +15,7 @@ export default function PessoasFamilia() {
   const [menor, setMenor] = useState(vazio), [revisao, setRevisao] = useState(0), [ocupado, setOcupado] = useState(false);
   const [erro, setErro] = useState(''), [sucesso, setSucesso] = useState(''), [codigo, setCodigo] = useState(null);
   const [autorizando, setAutorizando] = useState(null), [aceito, setAceito] = useState(false), [ciente, setCiente] = useState(false);
+  const [termoApp,setTermoApp] = useState(false);
   const [historico, setHistorico] = useState(null), [seguir, setSeguir] = useState(false);
   useEffect(() => { setDados(null);setMenor(vazio);setCodigo(null);setHistorico(null);setAutorizando(null);setSeguir(false);setErro('');setSucesso(''); }, [user?.id,user?.clienteId]);
   useEffect(() => {
@@ -76,7 +77,8 @@ export default function PessoasFamilia() {
           <p>Aparelho: {p.aparelho.nome || 'Não pareado'} · {p.aparelho.pausado ? 'Compartilhamento interrompido' : 'Habilitado no aparelho'}.</p>
           <p>{p.ultimaPosicao ? 'Última localização: '+new Date(p.ultimaPosicao.dataHora).toLocaleString('pt-BR')+' · precisão aproximada de '+Math.round(p.ultimaPosicao.precisao)+' m.' : 'Sem localização disponível. Confira verificação, autorização e compartilhamento no aparelho.'}</p>
           {editar && <>
-            <button disabled={ocupado} onClick={()=>{setAutorizando(p);setAceito(false);setCiente(false);}}>Ler e autorizar</button>{' '}
+            <button disabled={ocupado} onClick={()=>{setTermoApp(false);setAutorizando(p);setAceito(false);setCiente(false);}}>Ler e autorizar</button>{' '}
+            {dados.appDisponivel && <><button disabled={ocupado || !p.autorizado} onClick={()=>{setTermoApp(true);setAutorizando(p);setAceito(false);setCiente(false);}}>{p.autorizacaoApp?'Ler autorização do aplicativo':'Autorizar aplicativo em segundo plano'}</button>{' '}</>}
             <button disabled={ocupado || !p.autorizado} onClick={()=>acao('post','/familia/menores/'+p._id+'/codigo',{},'Código gerado. Use-o somente no aparelho que será acompanhado.')}>Adicionar ou trocar aparelho</button>{' '}
             <button disabled={ocupado} onClick={()=>{if(window.confirm('Revogar a autorização de '+p.nome+'? O envio será interrompido e as posições do banco ativo serão excluídas.'))acao('post','/familia/menores/'+p._id+'/revogar',{},'Autorização revogada e localização removida do banco ativo.');}}>Revogar autorização</button>{' '}
           </>}
@@ -87,14 +89,15 @@ export default function PessoasFamilia() {
     </>}
     {autorizando && dados && <section className="central-card" aria-label="Autorização do responsável">
       <h2>Autorização para {autorizando.nome}</h2><p>Responsável: {r?.nome}. Nascimento do menor: {autorizando.nascimento}.</p>
-      <pre style={{whiteSpace:'pre-wrap',fontFamily:'inherit'}}>{dados.termo.texto}</pre><p>Versão: {dados.termo.versao}</p>
+      {termoApp && <h3>Aplicativo Android e iPhone — localização em segundo plano</h3>}
+      <pre style={{whiteSpace:'pre-wrap',fontFamily:'inherit'}}>{(termoApp?dados.termoApp:dados.termo).texto}</pre><p>Versão: {(termoApp?dados.termoApp:dados.termo).versao}</p>
       <label><input type="checkbox" checked={aceito} onChange={e=>setAceito(e.target.checked)} /> Declaro o vínculo informado e autorizo especificamente o tratamento descrito no termo.</label><br />
       <label><input type="checkbox" checked={ciente} onChange={e=>setCiente(e.target.checked)} /> Expliquei ou explicarei antes da ativação o compartilhamento ao menor, de forma adequada à idade.</label><br />
-      <button disabled={ocupado || !aceito || !ciente} onClick={async()=>{if(await acao('post','/familia/menores/'+autorizando._id+'/autorizar',{aceito:true,cienteMenor:true,versao:dados.termo.versao,hash:dados.termo.hash},'Aceite registrado. A liberação depende da conferência do responsável e do vínculo.'))setAutorizando(null);}}>Registrar autorização</button>{' '}
+      <button disabled={ocupado || !aceito || !ciente} onClick={async()=>{const termo=termoApp?dados.termoApp:dados.termo;if(await acao('post','/familia/menores/'+autorizando._id+(termoApp?'/autorizar-app':'/autorizar'),{aceito:true,cienteMenor:true,versao:termo.versao,hash:termo.hash},'Aceite registrado. A liberação depende da conferência do responsável e do vínculo.'))setAutorizando(null);}}>Registrar autorização</button>{' '}
       <button disabled={ocupado} onClick={()=>setAutorizando(null)}>Fechar termo</button>
     </section>}
     {codigo && <section className="central-card" aria-label="Código do aparelho"><h2>Pareamento do aparelho</h2>
-      <p>No celular acompanhado, abra <Link to="/pessoas/aparelho" target="_blank" rel="noreferrer">Página do aparelho</Link> e digite:</p>
+      <p>No celular do menor, abra a <Link to="/pessoas/aparelho" target="_blank" rel="noreferrer">Página do aparelho</Link> e digite o código. Para o piloto nativo, use o aplicativo Linktrac Família instalado e autorizado em segundo plano. O responsável acompanha pela própria conta.</p>
       <strong style={{fontSize:'1.5rem',letterSpacing:2}}>{codigo.codigo}</strong><p>Válido até {new Date(codigo.expiraEm).toLocaleString('pt-BR')}. Uso único. Um novo código substitui o aparelho anterior.</p>
       <button onClick={()=>setCodigo(null)}>Ocultar código</button>
     </section>}

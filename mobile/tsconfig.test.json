@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "module": "commonjs", "target": "ES2022", "rootDir": "src", "outDir": ".test-build", "strict": true, "skipLibCheck": true },
+  "include": ["src/core.ts"]
+}
