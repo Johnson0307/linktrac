@@ -5,6 +5,7 @@ import { lazy, Suspense } from 'react';
 import CentralOperacao from './paginas/CentralOperacao';
 import { CadastroCameras } from './paginas/Equipamentos';
 import ManualUso from './componentes/ManualUso';
+import LembretePonto from './componentes/LembretePonto';
 import Manuais from './paginas/Manuais';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './componentes/layout/NavBar.jsx';
@@ -42,6 +43,7 @@ function Conteudo({ children }) {
   const { user } = useAuth();
   return <main id="conteudo-principal" tabIndex={-1} className={user ? 'app-content' : 'public-content'}>
     {!user && <ManualUso />}
+    {user && <LembretePonto key={`${user.clienteId}:${user.id || user._id || user.email}`} />}
     {children}
   </main>;
 }

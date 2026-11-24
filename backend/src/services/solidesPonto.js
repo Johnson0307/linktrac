@@ -92,13 +92,12 @@ async function verificarCredencial(token, enviar = fetch) {
 async function testarConta(empresa) {
   const atual = await Conta.findById(empresa).select('+credencial').lean();
   if (atual?.provedor !== 'solides') throw erro(409, 'O conector deste fornecedor ainda precisa ser desenvolvido e validado.');
-  if (!atual?.liberada) throw erro(409, 'Aguarde a liberação da Sólides e confirme a autorização antes de testar.');
   if (!atual.credencial) throw erro(409, 'Cadastre o token fornecido pela Sólides.');
   let token;
   try { token = revelar(atual.credencial, empresa); } catch { throw erro(503, 'Não foi possível abrir a credencial. Confira a proteção no servidor ou cadastre novamente o token.'); }
   const agora = new Date();
   const reservado = await Conta.findOneAndUpdate({ _id: empresa, revisao: atual.revisao,
-    liberada: true, $or: [{ tentativaEm: { $exists: false } },
+    $or: [{ tentativaEm: { $exists: false } },
       { tentativaEm: { $lt: new Date(agora.getTime() - 30000) } }] },
   { $set: { tentativaEm: agora } });
   if (!reservado) throw erro(429, 'Aguarde 30 segundos entre testes ou atualize a configuração.');

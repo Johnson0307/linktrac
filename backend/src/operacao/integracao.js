@@ -123,6 +123,10 @@ router.post(['/traccar', '/traccar-gerenciado'], async (req, res) => {
       mensagem: erro.status ? erro.message : 'Recepção BLE temporariamente indisponível.' });
   }
   if (body.semGPS) {
+    try { await require('../services/lembretePonto').processar(req.veiculoIntegracao, {
+      ...body, dispositivoId: req.dispositivo._id,
+      fonte: req.veiculoIntegracao.marca === 'TESTE' && req.veiculoIntegracao.modelo === 'SIMULACAO' ? 'simulado' : 'dispositivo',
+    }); } catch { res.setHeader('X-Linktrac-Automacoes', 'indisponivel'); }
     await verificarAlimentacao(req, body, res);
     await registrarRecepcao(req, body);
     return res.json({ sucesso: true, semGPS: true });
@@ -147,6 +151,8 @@ router.post('/telemetria', async (req, res) => {
     let p;
     try { p = await Amostra.create({ ...filtro, clienteId: req.dispositivo.clienteId, motoristaId, dataHora: new Date(req.body.dataHora), fonte: req.veiculoIntegracao.marca === 'TESTE' && req.veiculoIntegracao.modelo === 'SIMULACAO' ? 'simulado' : 'dispositivo', ignicao: req.body.ignicao ?? null, velocidade: req.body.velocidade, telemetria: dados }); }
     catch (e) { if (e.code === 11000) return res.json({ sucesso: true, repetida: true }); throw e; }
+    try { await require('../services/lembretePonto').processar(req.veiculoIntegracao, { ...p.toObject(), dispositivoId: req.dispositivo._id }); }
+    catch { res.setHeader('X-Linktrac-Lembrete-Ponto', 'indisponivel'); }
     try {
       const anterior = await Amostra.findOne({ veiculoId: p.veiculoId, _id: { $ne: p._id } }).sort({ dataHora: -1 }).lean();
       if (Date.now() - new Date(p.dataHora) <= 300000 && (!anterior || new Date(anterior.dataHora) < new Date(p.dataHora))) {

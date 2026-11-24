@@ -165,6 +165,8 @@ exports.atualizarPosicao = async (req, res) => {
       throw err;
     }
     if (req.dispositivo) {
+      try { await require('../services/lembretePonto').processar(veiculos[0], novaPosicao.toObject ? novaPosicao.toObject() : novaPosicao); }
+      catch { res.setHeader?.('X-Linktrac-Lembrete-Ponto', 'indisponivel'); }
       try { await require('../operacao/automacoes').processarPosicao(veiculos[0], novaPosicao.toObject ? novaPosicao.toObject() : novaPosicao); }
       catch { res.setHeader?.('X-Linktrac-Automacoes', 'indisponivel'); }
     }

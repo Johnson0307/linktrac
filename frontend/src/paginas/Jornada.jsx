@@ -15,6 +15,7 @@ export default function Jornada() {
   const administrador = user?.role === 'admin' && podeConfigurar;
   const [dados, setDados] = useState(null), [form, setForm] = useState(vazio);
   const [vinculo, setVinculo] = useState({ motoristaId: '', colaboradorExterno: '' });
+  const [lembreteAtivo, setLembreteAtivo] = useState(false);
   const [ocupado, setOcupado] = useState(false), [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(''), [sucesso, setSucesso] = useState(''), [revisao, setRevisao] = useState(0);
   useEffect(() => { setDados(null); setForm(vazio); setVinculo({ motoristaId: '', colaboradorExterno: '' }); setErro(''); setSucesso(''); }, [user?.clienteId]);
@@ -23,6 +24,7 @@ export default function Jornada() {
     api.get('/jornada', { signal: controle.signal }).then(({ data }) => {
       if (controle.signal.aborted) return;
       setDados(data.dados); const c = data.dados.conta;
+      setLembreteAtivo(Boolean(data.dados.lembrete?.ativo));
       setForm({ provedor: c.provedor, nomeOutro: c.nomeOutro, liberada: c.liberada, token: '' }); setErro('');
     }).catch(e => { if (!controle.signal.aborted) setErro(e.response?.data?.mensagem || 'Não foi possível consultar a jornada.'); })
       .finally(() => { if (!controle.signal.aborted) setCarregando(false); });
@@ -55,6 +57,16 @@ export default function Jornada() {
       {conta && <p>Fornecedor: <strong>{nome}</strong> · {conta.liberada ? 'Liberação informada pelo administrador' : 'Aguardando liberação do fornecedor'}</p>}
     </div>
     {conta && <details className="central-card">
+      <summary>Lembrete de ponto ao identificar o motorista</summary>
+      <p>Ignição ligada e identificação enviada pelo equipamento geram um aviso ao motorista conectado à plataforma. Apenas vincular o motorista ao veículo não dispara o aviso.</p>
+      <p>Versão web: mantenha a página aberta. O app Linktrac Família ainda não recebe este lembrete com a tela fechada. Não há batida automática nem consulta ao ponto já registrado no fornecedor.</p>
+      <p>Cadastre o identificador do leitor e o mesmo e-mail da conta no motorista ativo. Se já bateu o ponto, o motorista pode dispensar o lembrete.</p>
+      {administrador ? <form onSubmit={e => { e.preventDefault(); acao('put', '/jornada/lembrete', { ativo: lembreteAtivo }, 'Preferência do lembrete salva. Dispensar o aviso não registra ponto.'); }}>
+        <label><input type="checkbox" disabled={ocupado || carregando} checked={lembreteAtivo} onChange={e => setLembreteAtivo(e.target.checked)} /> Ativar lembrete na plataforma web</label>{' '}
+        <button disabled={ocupado || carregando}>Salvar lembrete</button>
+      </form> : <p>{dados.lembrete?.ativo ? 'Lembrete web ativado' : 'Lembrete web desativado'}. O administrador altera esta preferência.</p>}
+    </details>}
+    {conta && <details className="central-card">
       <summary>Configuração do fornecedor</summary>
       {administrador ? <form onSubmit={e => { e.preventDefault(); acao('put', '/jornada/configuracao', form, 'Configuração salva. A sincronização continua pendente de validação.'); }}>
         <fieldset className="central-form" disabled={ocupado || carregando}>
@@ -75,7 +87,8 @@ export default function Jornada() {
       <p>Credencial: {conta.temToken ? 'Salva e protegida no servidor' : 'Não cadastrada'}. Último teste: {quando(conta.testeEm)}.</p>
       <p>{mensagensTeste[conta.testeEstado] || 'Não testado'}</p>
       {administrador && <div>
-        <button disabled={ocupado || carregando || mudou || !conta.temToken || !conta.liberada || conta.provedor !== 'solides'} onClick={() => acao('post', '/jornada/testar', {}, '')}>Testar acesso inicial</button>{' '}
+        <p>O teste usa somente a credencial salva e não ativa a sincronização nem confirma condições comerciais.</p>
+        <button disabled={ocupado || carregando || mudou || !conta.temToken || conta.provedor !== 'solides'} onClick={() => acao('post', '/jornada/testar', {}, '')}>Testar acesso inicial</button>{' '}
         <button disabled={ocupado || carregando || !conta.temToken} onClick={() => {
           if (window.confirm('Remover a credencial salva e desativar a conexão? Os vínculos serão preservados.')) acao('post', '/jornada/desconectar', {}, 'Conexão desativada e credencial removida.');
         }}>Desconectar</button>

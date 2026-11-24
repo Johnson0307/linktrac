@@ -4,8 +4,21 @@ const { authorize } = require('../middlewares/authorizationMiddleware');
 const { permite } = require('../services/acessosCliente');
 const Motorista = require('../models/Motorista');
 const solides = require('../services/solidesPonto');
+const lembretes = require('../services/lembretePonto');
 const router = express.Router();
-router.use(authenticate, authorize('admin', 'gestor'));
+router.use(authenticate);
+router.use('/meus-lembretes', (req, res, next) => {
+  res.set('Cache-Control', 'private, no-store');
+  if (!permite(req.user.acessos, 'operacao')) return res.status(403).json({ sucesso: false, mensagem: 'Jornada não está liberada para sua empresa.' });
+  next();
+});
+const pessoal = acao => async (req, res) => {
+  try { res.json({ sucesso: true, dados: await acao(req) }); }
+  catch (e) { res.status(e.status || 503).json({ sucesso: false, mensagem: e.status ? e.message : 'Não foi possível consultar o lembrete.' }); }
+};
+router.get('/meus-lembretes', pessoal(req => lembretes.meusLembretes(req.user)));
+router.post('/meus-lembretes/:id/dispensar', pessoal(req => lembretes.dispensar(req.user, req.params.id)));
+router.use(authorize('admin', 'gestor'));
 router.use((req, res, next) => {
   res.set('Cache-Control', 'private, no-store');
   if (!permite(req.user.acessos, 'operacao', req.method !== 'GET')) return res.status(403).json({ sucesso: false, mensagem: 'Jornada não está liberada para sua empresa.' });
@@ -25,8 +38,10 @@ router.get('/', executar(async req => {
     solides.Vinculo.find({ clienteId: empresa, provedor: conta.provedor }).sort({ updatedAt: -1 }).limit(1000).lean(),
     Motorista.find({ clienteId: empresa }).select('_id nome status').sort({ nome: 1 }).limit(1000).lean(),
   ]);
-  return { conta, vinculos: vinculos.filter(v => v.provedor === conta.provedor), motoristas, provedores: solides.provedores };
+  return { conta, vinculos: vinculos.filter(v => v.provedor === conta.provedor), motoristas, provedores: solides.provedores,
+    lembrete: await lembretes.obterConfiguracao(empresa) };
 }));
+router.put('/lembrete', executar(req => lembretes.salvarConfiguracao(req.user.clienteId, autor(req), req.body)));
 router.put('/configuracao', executar(req => solides.salvarConta(req.user.clienteId, autor(req), req.body)));
 router.post('/testar', executar(req => solides.testarConta(req.user.clienteId)));
 router.post('/desconectar', executar(async req => { await solides.desconectar(req.user.clienteId, autor(req)); return { desconectada: true }; }));

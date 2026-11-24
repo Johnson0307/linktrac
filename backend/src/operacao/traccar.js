@@ -4,6 +4,7 @@ const converterTraccar = (body, codigoExterno, { aceitarAlarmeSemGps = false, ac
   const comunicacao = aceitarComunicacaoSemPosicao && p.id === 0;
   if (!Number.isSafeInteger(p.id) || (p.id < 1 && !comunicacao) || typeof p.fixTime !== 'string' || !Number.isFinite(Date.parse(p.fixTime))) throw new Error('Posição Traccar sem identificador ou horário válido.');
   const a = p.attributes || {}; const t = {};
+  if (typeof a.driverUniqueId === 'string' && a.driverUniqueId.length <= 80) t.identificadorMotorista = a.driverUniqueId;
   const alarmes = typeof a.alarm === 'string' ? a.alarm.split(',').map(valor => valor.trim()) : [];
   const corteAlimentacao = alarmes.includes('powerCut');
   const restaurada = alarmes.includes('powerRestored');

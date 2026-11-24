@@ -33,7 +33,7 @@ it.each([[200,'conexao_aceita'],[401,'acesso_recusado'],[403,'acesso_recusado'],
 it('erros externos não expõem credencial',async()=>{
  expect(await ponto.verificarCredencial('segredo',async()=>{throw Error('segredo');})).toBe('fornecedor_indisponivel');
 });
-it('outro fornecedor ou liberação pendente não gera tráfego externo',async()=>{
+it('outro fornecedor ou credencial ausente não gera tráfego externo',async()=>{
  const get=vi.spyOn(ponto.Conta,'findById').mockReturnValue({select:()=>({lean:async()=>({provedor:'pontotel',liberada:true})})});
  const net=vi.spyOn(globalThis,'fetch');await expect(ponto.testarConta(empresa)).rejects.toMatchObject({status:409});
  get.mockReturnValue({select:()=>({lean:async()=>({provedor:'solides',liberada:false})})});
@@ -44,7 +44,17 @@ it('limite de testes por empresa é atômico e antecede a requisição externa',
  vi.spyOn(ponto.Conta,'findById').mockReturnValue({select:()=>({lean:async()=>({provedor:'solides',liberada:true,revisao:'r1',credencial:ponto.proteger('segredo',empresa)})})});
  const lock=vi.spyOn(ponto.Conta,'findOneAndUpdate').mockResolvedValue(null);const net=vi.spyOn(globalThis,'fetch');
  await expect(ponto.testarConta(empresa)).rejects.toMatchObject({status:429});
- expect(lock.mock.calls[0][0]).toMatchObject({_id:empresa,revisao:'r1',liberada:true});expect(net).not.toHaveBeenCalled();
+ expect(lock.mock.calls[0][0]).toMatchObject({_id:empresa,revisao:'r1'});expect(net).not.toHaveBeenCalled();
+});
+it('teste autorizado da credencial não exige nem altera declaração de liberação comercial',async()=>{
+ vi.stubEnv('INTEGRACOES_CHAVE_CRIPTOGRAFIA','1'.repeat(64));
+ vi.spyOn(ponto.Conta,'findById').mockReturnValue({select:()=>({lean:async()=>({provedor:'solides',liberada:false,revisao:'r1',credencial:ponto.proteger('segredo',empresa)})})});
+ const lock=vi.spyOn(ponto.Conta,'findOneAndUpdate').mockResolvedValue({});
+ const update=vi.spyOn(ponto.Conta,'updateOne').mockResolvedValue({});
+ vi.spyOn(globalThis,'fetch').mockResolvedValue({status:200});
+ expect((await ponto.testarConta(empresa)).estado).toBe('conexao_aceita');
+ expect(lock.mock.calls[0][0]).not.toHaveProperty('liberada');
+ expect(update.mock.calls[0][1].$set).not.toHaveProperty('liberada');
 });
 it('vínculo exige motorista da própria empresa e separa o fornecedor',async()=>{
  const exists=vi.spyOn(Motorista,'exists').mockResolvedValue(null);const salvar=vi.spyOn(ponto.Vinculo,'findOneAndUpdate').mockResolvedValue({});
@@ -78,6 +88,7 @@ it('consulta de operação não libera alteração e módulo bloqueado recusa co
  expect((await request('/',{acessos:{operacao:'bloqueado'}})).status).toBe(403);
 });
 it('consulta retorna somente vínculos do fornecedor e motoristas da própria empresa',async()=>{
+ vi.spyOn(require('../src/services/lembretePonto'),'obterConfiguracao').mockResolvedValue({ativo:false,canal:'web_aberta'});
  vi.spyOn(ponto,'obterConta').mockResolvedValue({provedor:'solides'});
  const v=vi.spyOn(ponto.Vinculo,'find').mockReturnValue({sort:()=>({limit:()=>({lean:async()=>[]})})});
  const m=vi.spyOn(Motorista,'find').mockReturnValue({select:()=>({sort:()=>({limit:()=>({lean:async()=>[]})})})});
