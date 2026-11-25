@@ -11,6 +11,7 @@ const categorias = [
   ['Roteirização', /roteir|\brota\b|navegação|entrega/i],
   ['Abastecimento e custos', /abasteci|combustível|economia|fraude/i],
   ['Telemetria e manutenção', /telemetria|odômetro|horímetro|manutenção/i],
+  ['Equipamentos e firmware', /firmware|rastreador|equipamento|bluetooth|\bble\b/i],
   ['Integrações', /\bapi\b|webhook|conector|integraç|montadora/i],
   ['Motoristas', /motorista|condutor/i],
 ];
@@ -26,19 +27,22 @@ function propostas(corpo) {
   const encontrados = [];
   let bloco = [];
   const fechar = () => { if (bloco.length) encontrados.push(bloco.join(' ')); bloco = []; };
-  for (const linha of corpo.split(/\r?\n/)) {
-    const colunas = linha.trimEnd().split(/\t+/);
+  for (const original of corpo.split(/\r?\n/)) {
+    const linha = original.replace(/\*\*|__/g, '').trimEnd();
+    const colunas = linha.trim().startsWith('|') ? linha.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()) : linha.trimEnd().split(/\t+/);
     const tabela = colunas.length >= 2 ? colunas.at(-1).trim() : '';
     if (ideia.test(linha)) {
       fechar();
       bloco = [linha.replace(ideia, '').trim()];
-    } else if (tabela && !/^ideia\b/i.test(tabela)) {
+    } else if (tabela && !/^ideia\b/i.test(tabela) && !/^[:\s-]+$/.test(tabela)) {
       fechar();
       encontrados.push(tabela);
-    } else if (!linha.trim() || /^\s*(?:\d+[.)]\s|prioridade|status:|fonte:|briefing de frotas)/i.test(linha)) {
+    } else if (bloco.length && /^\s*\d+[.)]\s/.test(linha)) {
+      bloco.push(linha.trim().replace(/^\d+[.)]\s+/, ''));
+    } else if (/^\s*(?:#{1,6}\s|---+\s*$|\d+[.)]\s|prioridade|status:|fonte:|briefing de frotas)/i.test(linha)) {
       fechar();
-    } else if (bloco.length) {
-      bloco.push(linha.trim());
+    } else if (bloco.length && linha.trim()) {
+      bloco.push(linha.trim().replace(/^[-•]\s+/, ''));
     }
   }
   fechar();

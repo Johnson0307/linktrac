@@ -64,6 +64,15 @@ export default function Briefings() {
       setOcupado(false);
     }
   }
+  async function importarDisponiveis() {
+    setOcupado(true); setErro(''); setAviso('');
+    try {
+      const { data } = await api.post(endpoint + '/edicoes-disponiveis', {});
+      setAviso(`${data.novas} edição(ões) adicionada(s) e ${data.repetidas} já importada(s). ${data.aviso}`);
+      setRevisao(v => v + 1);
+    } catch (e) { setErro(mensagemErro(e)); }
+    finally { setOcupado(false); }
+  }
 
   async function alterar(edicao, item, status) {
     setOcupado(true);
@@ -87,6 +96,7 @@ export default function Briefings() {
   return <div className="central-page">
     <AcoesDaPagina>
       <button type="button" disabled={ocupado} onClick={() => setRevisao(v => v + 1)}>Atualizar fila</button>
+      <button type="button" disabled={ocupado} onClick={importarDisponiveis}>Importar edições disponíveis</button>
     </AcoesDaPagina>
     <p>As propostas de cada briefing entram na fila para revisão. A situação registrada acompanha o trabalho da equipe.</p>
     {erro && <p role="alert">{erro}</p>}

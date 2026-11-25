@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, AppState, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { Link } from 'expo-router';
 import { reconcile, requestPermissions, SITE, startGPS, tracker } from './src/native';
 
 const empty = { pareado: false, nome: '', ativo: false, enviado: 0, aviso: '', pendentes: 0 };
@@ -62,6 +63,7 @@ function Screen() {
       </View>
       <Text style={styles.small}>O celular precisa estar ligado, com localização e permissões ativas. Falta de internet, economia de bateria ou encerramento forçado podem interromper as atualizações. Este recurso não substitui atendimento de emergência.</Text>
       <Button title="Abrir painel do responsável" secondary onPress={() => void Linking.openURL(SITE + '/pessoas')} />
+      <Link href="/motorista" style={styles.secondaryText}>Entrar como motorista</Link>
       <Button title="Configurações de permissão do celular" secondary onPress={() => void Linking.openSettings()} />
       <Text style={styles.footer}>Linktrac Família · Piloto para testes</Text>
     </ScrollView></SafeAreaView>;

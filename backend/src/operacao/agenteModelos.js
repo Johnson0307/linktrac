@@ -10,6 +10,8 @@ const Config = mongoose.model(
       ...comum,
       temperaturaMotorMax: Number,
       tensaoMinima: Number,
+      dpfObservarPct: Number,
+      dpfInspecaoPct: Number,
       monitorar: { type: Boolean, default: false },
     },
     { timestamps: true }

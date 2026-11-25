@@ -2,7 +2,7 @@
   "expo": {
     "name": "Linktrac Família",
     "slug": "linktrac-familia",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "scheme": "linktracfamilia",
     "icon": "./assets/linktrac-logo.jpeg",
@@ -15,6 +15,7 @@
       }
     },
     "android": {
+      "versionCode": 2,
       "package": "br.com.linktrac.familia",
       "allowBackup": false,
       "blockedPermissions": [
@@ -28,6 +29,7 @@
     },
     "plugins": [
       "expo-router",
+      ["expo-notifications", { "defaultChannel": "jornada", "color": "#159FC8", "enableRemoteNotifications": true }],
       "./plugins/withShortCmakePaths.js",
       [
         "expo-location",

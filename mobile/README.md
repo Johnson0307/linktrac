@@ -1,5 +1,43 @@
 # Linktrac Família — Android e iOS
 
+## Versão 0.2.0: acesso Motorista
+
+Na tela inicial, **Entrar como motorista** abre um acesso separado do pareamento familiar.
+Use a conta de perfil Motorista e o mesmo e-mail do cadastro ativo da empresa, com módulo
+Operação liberado. Este módulo não inicia GPS nem registra ponto oficial.
+
+O aplicativo salva apenas uma credencial opaca própria em SecureStore; senha e JWT de login
+não são persistidos. A sessão dura até 30 dias, mas o servidor confere usuário, empresa e
+vínculo a cada consulta/envio. Para sair, é preciso conexão para revogar o destino de avisos;
+se a conta foi bloqueada, a desconexão continua permitida.
+
+O motorista autoriza notificações explicitamente. O aviso na tela bloqueada é genérico,
+sem placa, nome, coordenadas ou identificador de funcionário. Ao tocar, abre a tela Motorista,
+que consulta os próprios lembretes. **Dispensar lembrete não bate ponto.**
+
+### Configuração de notificações (ainda necessária para envio real)
+
+- Projeto Expo da Linktrac, FCM v1 no Android e APNs no iOS.
+- No build: `EXPO_PUBLIC_EAS_PROJECT_ID` (UUID público do projeto).
+- No build Android: `LINKTRAC_GOOGLE_SERVICES_FILE` aponta ao `google-services.json`
+  do pacote `br.com.linktrac.familia`. O arquivo não entra no Git.
+- Credenciais de envio FCM/APNs configuradas no projeto Expo, com segurança adicional de push.
+- No servidor privado: `PUSH_MOTORISTA_EXPO_PROJECT_ID`,
+  `PUSH_MOTORISTA_EXPO_ACCESS_TOKEN`, `PUSH_MOTORISTA_HABILITADO=1` e a chave de
+  proteção de integrações já usada pela plataforma. Nunca trocar a chave existente.
+- No iPhone: assinatura e conta Apple Developer. Não há IPA assinada neste projeto.
+- O app sem essas configurações mostra a pendência e mantém consulta com tela aberta.
+  Uma compilação sem credenciais não comprova recebimento com tela bloqueada.
+
+Teste em celular físico: identificação + ignição, app aberto/fechado, tela bloqueada,
+falta e retorno de internet, permissão negada, saída da conta e bloqueio do usuário.
+Expo/FCM/APNs podem atrasar ou perder notificações; recibo do provedor não confirma
+recebimento ou leitura pelo motorista. O servidor expira avisos de push após 3 minutos,
+revalida o ciclo da ignição e confere os recibos. Não existe garantia de entrega imediata.
+
+Documentação oficial: https://docs.expo.dev/versions/v58.0.0/sdk/notifications/
+e https://docs.expo.dev/push-notifications/sending-notifications/ .
+
 Aplicativo React Native/Expo com uma base compartilhada para o celular acompanhado.
 O responsável continua usando o painel web Pessoas e família. Não é um aplicativo para
 monitoramento oculto: o compartilhamento exige ação no próprio celular e permissões do sistema,

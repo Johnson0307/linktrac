@@ -111,6 +111,8 @@ router.get('/:veiculoId', async (req, res) => {
         ? {
             temperaturaMotorMax: config.temperaturaMotorMax ?? null,
             tensaoMinima: config.tensaoMinima ?? null,
+            dpfObservarPct: config.dpfObservarPct ?? null,
+            dpfInspecaoPct: config.dpfInspecaoPct ?? null,
             monitorar: config.monitorar === true,
           }
         : {},

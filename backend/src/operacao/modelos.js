@@ -7,7 +7,8 @@ schema.index({ clienteId: 1, tipo: 1, createdAt: -1 });
 schema.index({ clienteId: 1, tipo: 1, 'dados.codigo': 1 }, { unique: true, partialFilterExpression: { 'dados.codigo': { $type: 'string' } } });
 const Registro = mongoose.model('RegistroOperacional', schema);
 const notificacao = new mongoose.Schema({ clienteId: { type: mongoose.Schema.Types.ObjectId, required: true }, chave: { type: String, required: true }, veiculoId: mongoose.Schema.Types.ObjectId, motoristaId: mongoose.Schema.Types.ObjectId, tipo: String, mensagem: String, simulado: Boolean, lida: { type: Boolean, default: false } }, { timestamps: true });
-notificacao.add({ entregasExternas: mongoose.Schema.Types.Mixed, ocorridoEm: Date, cicloPonto: String });
+notificacao.add({ entregasExternas: mongoose.Schema.Types.Mixed, ocorridoEm: Date, cicloPonto: String, pushPreparado: Boolean });
+notificacao.index({ tipo: 1, ocorridoEm: 1, pushPreparado: 1 });
 const acaoOcorrencia = new mongoose.Schema({
   tipo: String, por: mongoose.Schema.Types.ObjectId, nome: String, em: Date, texto: String,
 }, { _id: false });
@@ -32,6 +33,7 @@ dispositivo.add({
   protocoloReceptor: String,
   receptorTraccarDesde: { type: Date, select: false },
   garantiaAte: String,
+  firmware: mongoose.Schema.Types.Mixed,
   revisaoVinculoChip: { type: Number, select: false },
   ultimoGpsEm: Date,
   estadoAlimentacao: { type: new mongoose.Schema({ alimentada: Boolean, dataHora: Date }, { _id: false }), select: false },

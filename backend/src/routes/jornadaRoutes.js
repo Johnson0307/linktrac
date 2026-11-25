@@ -39,7 +39,7 @@ router.get('/', executar(async req => {
     Motorista.find({ clienteId: empresa }).select('_id nome status').sort({ nome: 1 }).limit(1000).lean(),
   ]);
   return { conta, vinculos: vinculos.filter(v => v.provedor === conta.provedor), motoristas, provedores: solides.provedores,
-    lembrete: await lembretes.obterConfiguracao(empresa) };
+    lembrete: await lembretes.obterConfiguracao(empresa), push: require('../services/pushMotorista').configuracao() };
 }));
 router.put('/lembrete', executar(req => lembretes.salvarConfiguracao(req.user.clienteId, autor(req), req.body)));
 router.put('/configuracao', executar(req => solides.salvarConta(req.user.clienteId, autor(req), req.body)));

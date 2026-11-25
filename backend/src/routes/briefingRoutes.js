@@ -43,6 +43,12 @@ router.post('/receber', (req, res, next) => {
 }, importar);
 
 router.use(authenticate, central);
+router.post('/edicoes-disponiveis', tratar(async (req, res) => {
+  const edicoes = require('../data/briefings-propostas-ate-2026-11-23.json');
+  const novas = await registrarEdicoes(req.user.clienteId, edicoes, req.user.email);
+  return res.status(novas ? 201 : 200).json({ sucesso: true, novas, repetidas: edicoes.length - novas,
+    aviso: 'Propostas importadas para revisão. Importar não implementa nem publica funções automaticamente.' });
+}));
 router.post('/', importar);
 router.get('/', tratar(async (req, res) => {
   const dados = await Edicao.find({ clienteId: req.user.clienteId }).select('-hash')

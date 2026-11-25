@@ -59,7 +59,8 @@ export default function Jornada() {
     {conta && <details className="central-card">
       <summary>Lembrete de ponto ao identificar o motorista</summary>
       <p>Ignição ligada e identificação enviada pelo equipamento geram um aviso ao motorista conectado à plataforma. Apenas vincular o motorista ao veículo não dispara o aviso.</p>
-      <p>Versão web: mantenha a página aberta. O app Linktrac Família ainda não recebe este lembrete com a tela fechada. Não há batida automática nem consulta ao ponto já registrado no fornecedor.</p>
+      <p>Versão web: mantenha a página aberta. O app 0.2.0 tem acesso Motorista e preparo para avisos com tela fechada. O envio depende de configuração Expo/Android/iPhone e permissão neste celular.</p>
+      <p>{dados.push?.disponivel ? 'Envio push configurado no servidor; confirme em teste físico no celular.' : 'Envio push ainda não configurado no servidor.'} Não há batida automática nem consulta ao ponto já registrado no fornecedor.</p>
       <p>Cadastre o identificador do leitor e o mesmo e-mail da conta no motorista ativo. Se já bateu o ponto, o motorista pode dispensar o lembrete.</p>
       {administrador ? <form onSubmit={e => { e.preventDefault(); acao('put', '/jornada/lembrete', { ativo: lembreteAtivo }, 'Preferência do lembrete salva. Dispensar o aviso não registra ponto.'); }}>
         <label><input type="checkbox" disabled={ocupado || carregando} checked={lembreteAtivo} onChange={e => setLembreteAtivo(e.target.checked)} /> Ativar lembrete na plataforma web</label>{' '}

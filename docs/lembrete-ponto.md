@@ -22,7 +22,7 @@ A versão atual não consulta se a jornada já está aberta no fornecedor, não 
 
 ## Aplicativo e integração
 
-Este é um **lembrete na página web aberta**. Não é push com tela bloqueada. O app Linktrac Família ainda não possui autenticação do motorista nem notificações deste módulo. A próxima etapa exige esse fluxo de acesso, permissão de notificação no celular, configuração de envio para Android/iOS e testes físicos.
+A versão web exige página aberta. O **app 0.2.0** acrescenta acesso Motorista, credencial própria protegida, consulta pessoal e suporte a push. O servidor tem fila deduplicada, expiração, novas tentativas, recibos e revogação do aparelho. A ativação real ainda exige projeto Expo, credenciais FCM/APNs, assinatura iOS, autorização no celular e teste físico. Sem as credenciais, o app informa a pendência e permite consulta com tela aberta. Veja `mobile/README.md`. O módulo do motorista não inicia GPS nem faz marcações oficiais.
 
 O teste inicial da credencial Sólides é independente da declaração de liberação comercial: usa exclusivamente `GET https://employer.tangerino.com.br/test`, com limite de um teste por empresa a cada 30 segundos. Não ativa sincronização nem confirma plano, preço ou disponibilidade da API de marcações. O token continua protegido no servidor.
 

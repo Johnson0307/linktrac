@@ -5,7 +5,8 @@ import { permite } from '../ajuda/acessos';
 import './CentralOperacao.css';
 const CatalogoRastreadores = lazy(() => import('./CatalogoRastreadores'));
 
-const vazio = { nome: '', fabricante: '', modelo: '', codigoExterno: '', veiculoId: '', garantiaAte: '' };
+const firmwareVazio = { atual: '', disponivel: '', atualizadoEm: '', estado: 'nao_informado', recursos: [], falha: '' };
+const vazio = { nome: '', fabricante: '', modelo: '', codigoExterno: '', veiculoId: '', garantiaAte: '', firmware: firmwareVazio };
 const tipos = {
   cadastro: 'Cadastro', edicao: 'Edição', transferencia: 'Transferência',
   desativacao: 'Desativação', exclusao: 'Exclusão',
@@ -26,6 +27,7 @@ function Vinculo({ vinculo }) {
     <br />
     {[vinculo.nome, vinculo.fabricante, vinculo.modelo, vinculo.codigoExterno].filter(Boolean).join(' · ')}
     {vinculo.garantiaAte && <><br />Garantia até {dataGarantia(vinculo.garantiaAte)}</>}
+    {vinculo.firmware?.atual && <><br />Firmware {vinculo.firmware.atual} · {vinculo.firmware.estado}</>}
   </>;
 }
 
@@ -197,6 +199,7 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
       clienteId: d.clienteId?._id,
       veiculoId: d.veiculoId?._id || '',
       garantiaAte: d.garantiaAte || '',
+      firmware: { ...firmwareVazio, ...d.firmware },
       receptorTraccar: d.receptorTraccar === true,
       protocoloReceptor: d.protocoloReceptor || (d.receptorTraccar ? 'gt06' : ''),
     });
@@ -214,7 +217,9 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
     setToken(null);
     setRevelar(false);
     try {
-      const dados = { ...form, receptorTraccar };
+      const dados = { ...form, receptorTraccar, firmware: { ...form.firmware } };
+      dados.firmware.recursos = (dados.firmware.recursos || []).map(r => r.trim()).filter(Boolean);
+      if (dados.firmware.atualizadoEm) dados.firmware.atualizadoEm = new Date(dados.firmware.atualizadoEm).toISOString();
       if (!dados.protocoloReceptor) delete dados.protocoloReceptor;
       const { data } = editando
         ? await api.put(`/operacao/dispositivos/${editando._id}`, {
@@ -331,6 +336,21 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
         </label>
         <div className="central-full">
           {editando && clienteId !== editando.clienteId?._id && <p>A transferência para outro cliente gera um novo token. Se houver chip vinculado, ele volta ao estoque da empresa de origem.</p>}
+          <details><summary>Firmware e recursos do equipamento</summary>
+            <p>Registro informado pela equipe. Salvar não envia atualização remota nem confirma compatibilidade do fabricante.</p>
+            <div className="central-form">
+              {[['atual', 'Versão atual'], ['disponivel', 'Versão disponível']].map(([campo, titulo]) => <label key={campo}>{titulo}
+                <input maxLength={100} value={form.firmware?.[campo] || ''} onChange={e => setForm(v => ({ ...v, firmware: { ...v.firmware, [campo]: e.target.value } }))} />
+              </label>)}
+              <label>Última atualização informada<input type="datetime-local" value={form.firmware?.atualizadoEm ? new Date(new Date(form.firmware.atualizadoEm).getTime() - new Date(form.firmware.atualizadoEm).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                onChange={e => setForm(v => ({ ...v, firmware: { ...v.firmware, atualizadoEm: e.target.value } }))} /></label>
+              <label>Situação do firmware<select value={form.firmware?.estado || 'nao_informado'} onChange={e => setForm(v => ({ ...v, firmware: { ...v.firmware, estado: e.target.value } }))}>
+                {Object.entries({ nao_informado: 'Não informado', disponivel: 'Atualização disponível', em_teste: 'Em teste', concluida: 'Atualização registrada', falha: 'Falha informada' }).map(([valor, titulo]) => <option key={valor} value={valor}>{titulo}</option>)}
+              </select></label>
+              <label>Recursos desta versão (um por linha)<textarea value={(form.firmware?.recursos || []).join('\n')} maxLength={2019} onChange={e => setForm(v => ({ ...v, firmware: { ...v.firmware, recursos: e.target.value.split('\n') } }))} /></label>
+              <label>Falha informada<input maxLength={500} value={form.firmware?.falha || ''} onChange={e => setForm(v => ({ ...v, firmware: { ...v.firmware, falha: e.target.value } }))} /></label>
+            </div>
+          </details>
           <button type="submit" disabled={!form.veiculoId}>{ocupado ? 'Processando...' : 'Salvar equipamento'}</button>
           {editando && <button type="button" onClick={limpar}>Cancelar edição</button>}
         </div>
@@ -358,6 +378,7 @@ export default function Equipamentos({ user, somenteHistorico = false, somenteCa
         <thead><tr><th>Equipamento</th><th>Cliente</th><th>Veículo</th><th>Comunicação</th><th>Última leitura</th><th>Ações</th></tr></thead>
         <tbody>{lista.map(d => <tr key={d._id}>
           <td>{d.nome}{d.codigoExterno && <><br />{d.codigoExterno}</>}
+            {d.firmware?.atual && <><br />Firmware {d.firmware.atual}</>}
             {d.garantiaAte && <><br />Garantia até {dataGarantia(d.garantiaAte)}</>}</td>
           <td>{d.clienteId?.nome || '—'}</td><td>{d.veiculoId?.placa || '—'}</td>
           <td><strong>{d.estadoComunicacao || '—'}</strong>

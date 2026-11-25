@@ -23,6 +23,7 @@ const vinculoSchema = new mongoose.Schema({
   modelo: String,
   codigoExterno: String,
   garantiaAte: String,
+  firmware: mongoose.Schema.Types.Mixed,
 }, { _id: false });
 
 const eventoSchema = new mongoose.Schema({
@@ -75,6 +76,7 @@ const instantaneo = (d, { cliente, veiculo }) => ({
   modelo: d.modelo,
   codigoExterno: d.codigoExterno,
   garantiaAte: d.garantiaAte,
+  firmware: d.firmware,
 });
 
 async function registrar(session, req, dispositivoId, tipo, origem, destino) {
@@ -91,6 +93,7 @@ function dadosCadastro(b) {
     rejeitar(400, 'Informe nome e veículo válidos.');
   }
   const dados = { nome: b.nome.trim(), veiculoId: b.veiculoId };
+  if (b.firmware !== undefined) dados.firmware = require('./firmwareEquipamento').validarFirmware(b.firmware);
   if (b.receptorTraccar !== undefined) {
     if (typeof b.receptorTraccar !== 'boolean') rejeitar(400, 'Selecione um tipo de recepção válido.');
     dados.receptorTraccar = b.receptorTraccar;

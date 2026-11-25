@@ -1,0 +1,248 @@
+[
+  {
+    "data": "2026-09-28",
+    "hash": "976a3da905028f4a4f929cf9bd7c4118ff20ac12c7341e70d25b02b6212b53cb",
+    "itens": [
+      {
+        "id": "5ad2fbff00d83168f2755c20",
+        "texto": "Preparar a plataforma para receber tanto dados de rastreadores quanto dados fornecidos pelas montadoras, exibindo a origem e a frequência de atualização de cada sinal. Isso permitiria integrar frotas mistas sem perder a opção de rastreamento dedicado.",
+        "categoria": "Equipamentos e firmware",
+        "status": "para_revisao"
+      },
+      {
+        "id": "db7980acb5d5a0a4476c18a7",
+        "texto": "Para máquinas e veículos em pátios, testar primeiro alertas por zona e velocidade. Controle efetivo da velocidade só faria sentido com equipamento e integração comprovadamente compatíveis.",
+        "categoria": "Equipamentos e firmware",
+        "status": "para_revisao"
+      },
+      {
+        "id": "9c299f5d8639bcf04ce7e12b",
+        "texto": "Criar uma camada única de dados para motos, carros, caminhões e máquinas: mesmo painel e relatórios, com indicação clara quando um veículo não fornece determinado dado ou o atualiza com menor frequência.",
+        "categoria": "Operação",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-10-05",
+    "hash": "a73591e9589f28f39211307d4b691b80d3529ff427c915ec218a192bb36399e3",
+    "itens": [
+      {
+        "id": "dcb89c834c4f6936d347c509",
+        "texto": "Colocar no planejamento uma API Linktrac com webhooks. Exemplo: quando houver sonolência, entrada em área de risco ou ignição fora do horário, o sistema envia o evento imediatamente ao cliente, ao WhatsApp ou a outro software. Depois, incluir um assistente: “Quais veículos ficaram mais tempo ociosos esta semana?”",
+        "categoria": "Integrações",
+        "status": "para_revisao"
+      },
+      {
+        "id": "a45b6660400458eb056e5d50",
+        "texto": "Criar um Resumo Inteligente Linktrac, começando de forma simples: toda segunda-feira, mostrar os cinco veículos com maior risco, maior ociosidade, manutenção próxima e consumo anormal. Isso entrega valor sem exigir uma IA autônoma complexa no início.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      },
+      {
+        "id": "9e79ff8bcac188bf08d5c247",
+        "texto": "Manter a arquitetura híbrida discutida no briefing anterior: dados de montadora + rastreador Linktrac + OBD/CAN + câmeras, tudo convertido para um modelo único. Para o Brasil, é necessário confirmar a disponibilidade contratual dos dados de cada montadora.",
+        "categoria": "Videotelemetria",
+        "status": "para_revisao"
+      },
+      {
+        "id": "b63bb77cbd34080b00e9cafb",
+        "texto": "Para a Linktrac, integrar futuramente abastecimentos de cartões brasileiros e criar alertas como: “veículo longe do posto”, “litros acima da capacidade disponível” e “abastecimento com ignição/deslocamento incompatível”. Antes de bloquear pagamentos, começar com auditoria e alertas.",
+        "categoria": "Abastecimento e custos",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-10-12",
+    "hash": "855afd1f28cacfbc6e8ca18e26e1478c4dd91b01160c706707d6a3def2948bc6",
+    "itens": [
+      {
+        "id": "a825c0d5eefb082b65fdfa0d",
+        "texto": "Criar um painel “Economia gerada pela Linktrac”: custo estimado de ociosidade, combustível desperdiçado, manutenção evitada e uso inadequado. Comparar uma linha de base anterior com o resultado posterior para demonstrar retorno ao cliente.",
+        "categoria": "Abastecimento e custos",
+        "status": "para_revisao"
+      },
+      {
+        "id": "223e1af5100eba667c1b4656",
+        "texto": "Na videotelemetria Linktrac, criar níveis: alertar o motorista → verificar se corrigiu → gravar/enviar ao gestor somente se persistir. Isso reduz consumo de dados e fadiga de alertas. Para acidentes graves, priorizar o envio imediato de um trecho protegido antes e depois do impacto.",
+        "categoria": "Videotelemetria",
+        "status": "para_revisao"
+      },
+      {
+        "id": "ce83a2e5cbceb4152438a8fb",
+        "texto": "Criar no aplicativo um Painel do Motorista, mostrando nota, eventos, evolução e sugestões. Para clientes empresariais, incluir modo privacidade fora do expediente e registro transparente de quais dados foram coletados.",
+        "categoria": "Motoristas",
+        "status": "para_revisao"
+      },
+      {
+        "id": "6db077236c8b16b5f7c11d1e",
+        "texto": "Antes de instalar quatro câmeras em toda uma frota, executar um piloto Linktrac de 60 a 90 dias: registrar índices antes/depois de ociosidade, frenagem, aceleração, distração e acidentes. Isso ajuda a provar retorno e vender a expansão.",
+        "categoria": "Videotelemetria",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-10-19",
+    "hash": "8e35e4a5187c904a57002b28639fe6b780226fffbec5beedd401332ff734c44f",
+    "itens": [
+      {
+        "id": "ac04b2aa66a0045594ca2991",
+        "texto": "Começar com um agente supervisionado, que explique alertas e proponha ações sem executá-las sozinho: “quais caminhões ficaram ociosos e por quê?” ou “quais motos iniciaram viagem sem condutor identificado?”. Exigir evidência dos dados usados em cada resposta.",
+        "categoria": "Motoristas",
+        "status": "para_revisao"
+      },
+      {
+        "id": "cedcf2b4926464f14f001fa6",
+        "texto": "Ao desenhar a IA da Linktrac, separar dados sensíveis — localização, vídeo e identificação de motoristas — e oferecer controles de acesso, retenção e registro das consultas. Para clientes com exigências maiores, avaliar processamento privado antes de enviar esses dados a modelos externos.",
+        "categoria": "Motoristas",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-10-26",
+    "hash": "10c5a1704f9073046150e06f8b346b3fb1bf68d5534d4f85bcf072b52f7b8f7f",
+    "itens": [
+      {
+        "id": "c7af7c2e4c900dcbc2fd104b",
+        "texto": "Criar um Construtor de Automações Linktrac: “se houver três eventos graves em 24 horas, avisar o gestor”; “se surgir falha crítica no motor, abrir manutenção”; “se a máquina sair da área, acionar a central”. Começar com regras aprovadas pelo cliente e histórico de todas as ações.",
+        "categoria": "Telemetria e manutenção",
+        "status": "para_revisao"
+      },
+      {
+        "id": "40bfcea8f2222d2150cc5113",
+        "texto": "Adaptar para os clientes de caçambas e containers da Linktrac: registrar automaticamente entrega, retirada, recipiente cheio, permanência excedida e evidência visual. Isso pode alimentar cobrança, contestação e roteirização da próxima coleta.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      },
+      {
+        "id": "5f2bd7f3d713735ff597c508",
+        "texto": "Criar na Linktrac um conector baseado no AEMP 2.0 para máquinas. Padronizar localização, horímetro, utilização, falhas e manutenção ajudaria a receber dados de fabricantes diferentes sem desenvolver uma integração totalmente nova para cada modelo.",
+        "categoria": "Telemetria e manutenção",
+        "status": "para_revisao"
+      },
+      {
+        "id": "0ae1cb1b5cb18a8af323ef72",
+        "texto": "Quando a Linktrac enviar uma rota ao aplicativo do motorista, gerar um token com as restrições aprovadas: sequência de paradas, pedágios, tipo de veículo e demais opções. Registrar qualquer desvio ou recálculo para comparar planejamento e execução.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-11-02",
+    "hash": "63b3bd6c7e6f3160658a1614a3908265b9bbaa3e065272bb37191959981aeedf",
+    "itens": [
+      {
+        "id": "7a28df2abde5976901a97b58",
+        "texto": "Solicitar acesso técnico e comercial à Mobway para avaliar uma integração com a Linktrac. Usar os dados da montadora para quilometragem, manutenção e diagnóstico, mantendo o rastreador Linktrac quando o cliente precisar de posição frequente, bloqueio, bateria de reserva ou proteção contra furto.",
+        "categoria": "Telemetria e manutenção",
+        "status": "para_revisao"
+      },
+      {
+        "id": "8c417dec6fefb7871fd4a80f",
+        "texto": "Criar na videotelemetria Linktrac uma tela para aplicar configurações por grupo: motos, carros, caminhões ou máquinas. Para análise de colisão, apresentar fatores e nível de confiança, mantendo revisão humana e o vídeo original como evidência.",
+        "categoria": "Videotelemetria",
+        "status": "para_revisao"
+      },
+      {
+        "id": "841989e7e0febfb3fd93bf7f",
+        "texto": "Criar um Resumo do Motorista Linktrac em português, com três partes: comportamento positivo, principal risco da semana e ação recomendada. Entregar por aplicativo ou WhatsApp e registrar se o motorista visualizou.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      },
+      {
+        "id": "24bfba5a78349a1ddc1ca528",
+        "texto": "Avaliar etiquetas BLE de fornecedores homologados no Brasil para associar ferramentas e cargas aos veículos da Linktrac. Gerar um alerta quando o caminhão sair e uma ferramenta cadastrada ficar no pátio ou na obra.",
+        "categoria": "Equipamentos e firmware",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-11-09",
+    "hash": "29b6b1120b5b646cde3a8624ccba3d33a88802c48f8771f867051599ce7980c5",
+    "itens": [
+      {
+        "id": "e4278a797b6bd17658236fcb",
+        "texto": "criar um piloto de roteirização por tipo de veículo: Moto: `TWO_WHEELER` Carro e utilitário: modo convencional Caminhão: regras próprias de dimensão, restrição e horário Medir custo por rota, quilometragem, atraso e aderência ao trajeto em uma amostra de operações urbanas brasileiras.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      },
+      {
+        "id": "6c90bffc797275c70e8ea63d",
+        "texto": "estruturar uma camada de conectores padronizados para dados de OEMs, rastreadores e fornecedores de componentes. Um primeiro produto poderia ser um catálogo de integrações, com ativação por veículo e normalização de sinais como odômetro, consumo, falhas, frenagem e temperatura.",
+        "categoria": "Telemetria e manutenção",
+        "status": "para_revisao"
+      },
+      {
+        "id": "4204dcf4c1fbf6dd1e4eb0e7",
+        "texto": "definir um modelo de dados independente do fabricante para: Pressão e temperatura por roda Alimentação e bateria do equipamento Horímetro e quilometragem Permanência em pátios Falhas e manutenção prevista Isso permitiria incluir carretas e máquinas na mesma plataforma sem limitar o produto a coordenadas GPS.",
+        "categoria": "Telemetria e manutenção",
+        "status": "para_revisao"
+      },
+      {
+        "id": "769fb6fdac4e1b78c9f27edb",
+        "texto": "implementar políticas de câmera por local e finalidade: Desativar câmera interna em áreas privadas Manter colisão ativa mesmo quando outros eventos estiverem suspensos Ajustar regras de fadiga e distração por tipo de operação Registrar toda mudança em trilha de auditoria compatível com a LGPD",
+        "categoria": "Videotelemetria",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-11-16",
+    "hash": "e91ecc4a023b865b1e0bfa0c593e15bdcdd5a9ba1abcbba91c491b8b06f19918",
+    "itens": [
+      {
+        "id": "730a8580ace10cd62e497cfb",
+        "texto": "desenvolver um módulo que use os dados já coletados para: Sugerir o veículo mais próximo e adequado; Considerar horário, capacidade, motorista e tipo de veículo; Comparar rota planejada e realizada; Recalcular após atraso, desvio ou nova tarefa. Para motos, manter o piloto com o modo específico de duas rodas do Google apresentado no briefing anterior.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      },
+      {
+        "id": "2a91c0b08cd6bd49fc3d7188",
+        "texto": "solicitar à BWS: Protocolo de comunicação ou API; Frequência e capacidade da rede LoRa; Certificação Anatel; Consumo em cada modo; Preço para lote piloto. Testar em máquinas, carretas e operações rurais antes de considerar homologação.",
+        "categoria": "Integrações",
+        "status": "para_revisao"
+      },
+      {
+        "id": "37ab20b391b3bd8194b40572",
+        "texto": "transformar o aplicativo do motorista em uma versão mais econômica desse terminal: Reconhecimento facial no início da viagem; Rota e sequência de paradas; Checklist com foto; Mensagens da central; Botão de emergência; Funcionamento offline com sincronização posterior. Um equipamento dedicado pode ficar como opção para caminhões; motos e carros poderiam usar o aplicativo.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      },
+      {
+        "id": "8f3795d0fde188a82bf02f7c",
+        "texto": "adicionar revisão humana com quatro indicadores: Alerta confirmado; Falso positivo; Evento não identificado; Tempo entre evento e análise. Esses dados devem ser separados por câmera, versão da IA, tipo de veículo e condição da operação.",
+        "categoria": "Videotelemetria",
+        "status": "para_revisao"
+      }
+    ]
+  },
+  {
+    "data": "2026-11-23",
+    "hash": "918a22dd5534b689fed95fb28d5fe462189092742ef37547725cde74f531642f",
+    "itens": [
+      {
+        "id": "0a1e13ed04aaecda94be8d7e",
+        "texto": "criar uma regra de manutenção que combine: Nível de fuligem do DPF; Alertas e códigos CAN; Regenerações realizadas ou interrompidas; Quilometragem e horas de motor; Histórico de veículos semelhantes. Começar exibindo uma classificação simples: normal, observar ou manutenção urgente.",
+        "categoria": "Telemetria e manutenção",
+        "status": "para_revisao"
+      },
+      {
+        "id": "20557ef4110521f8f69d91bd",
+        "texto": "incluir no cadastro de equipamentos: Versão atual do firmware; Atualização disponível; Última atualização realizada; Recursos habilitados por versão; Falhas ocorridas durante o processo. Para os equipamentos homologados, avaliar atualização remota em grupos pequenos antes da frota inteira.",
+        "categoria": "Equipamentos e firmware",
+        "status": "para_revisao"
+      },
+      {
+        "id": "1527df2d302a426935527838",
+        "texto": "criar primeiro um assistente de voz limitado a tarefas seguras: Explicar um alerta mecânico em linguagem simples; Orientar checklist e inspeção; Informar a próxima parada; Avisar sobre direção sem motorista identificado; Permitir comunicação com a central sem digitar. Ações como bloqueio, alteração de rota e encerramento de ocorrência devem continuar exigindo confirmação humana.",
+        "categoria": "Roteirização",
+        "status": "para_revisao"
+      }
+    ]
+  }
+]

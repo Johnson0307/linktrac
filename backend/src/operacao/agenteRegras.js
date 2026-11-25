@@ -11,7 +11,10 @@ function validarConfig(body) {
   for (const [key, min, max] of [
     ['temperaturaMotorMax', 40, 150],
     ['tensaoMinima', 1, 60],
+    ['dpfObservarPct', 0, 100],
+    ['dpfInspecaoPct', 0, 100],
   ]) {
+    if (key.startsWith('dpf') && !Object.hasOwn(body, key)) continue;
     if (body[key] == null || body[key] === '') {
       dados[key] = null;
       continue;
@@ -20,6 +23,10 @@ function validarConfig(body) {
       return { erro: `Confira ${key}: intervalo ${min} a ${max}.` };
     dados[key] = body[key];
   }
+  if (Object.hasOwn(body, 'dpfObservarPct') !== Object.hasOwn(body, 'dpfInspecaoPct') ||
+      (dados.dpfObservarPct == null) !== (dados.dpfInspecaoPct == null) ||
+      dados.dpfObservarPct != null && dados.dpfObservarPct >= dados.dpfInspecaoPct)
+    return { erro: 'Informe as duas referências DPF do fabricante, com observação menor que inspeção, ou deixe ambas vazias.' };
   return { dados };
 }
 function analisar({
@@ -38,7 +45,8 @@ function analisar({
         +new Date(p.dataHora) >= inicio &&
         +new Date(p.dataHora) <= fim &&
         p.telemetria &&
-        Object.values(p.telemetria).some((v) => numero(v) || (Array.isArray(v) && v.length))
+        (Object.values(p.telemetria).some((v) => numero(v) || (Array.isArray(v) && v.length)) ||
+          p.telemetria.dpfLuz !== undefined || p.telemetria.dpfRegeneracao !== undefined)
     )
     .sort((a, b) => +new Date(a.dataHora) - +new Date(b.dataHora));
   const achados = [];
@@ -54,6 +62,17 @@ function analisar({
     campo: key,
     valor: p.telemetria[key],
   });
+  const ultimaDpf = amostras.filter(p => ['dpfFuligemPct', 'dpfLuz', 'dpfRegeneracao', 'dpfRegeneracoesInterrompidas'].some(k => p.telemetria[k] !== undefined) ||
+    (p.telemetria.dtcs || []).some(c => require('./dpf').codigosDpf.includes(c))).at(-1);
+  const dpf = require('./dpf').avaliarDpf(ultimaDpf?.telemetria, config);
+  if (ultimaDpf) {
+    dpf.dataHora = new Date(ultimaDpf.dataHora).toISOString();
+    dpf.evidencias = dpf.evidencias.map(e => ({ ...e, dataHora: dpf.dataHora }));
+    if (fim - +new Date(ultimaDpf.dataHora) > 86400000) dpf.estado = 'dados_antigos';
+    if (['inspecao_recomendada', 'observar'].includes(dpf.estado)) adicionar('dpf_' + dpf.estado,
+      dpf.estado === 'observar' ? 'DPF: acompanhar condição informada' : 'DPF: inspeção recomendada',
+      dpf.motivos.join(' ') + ' ' + dpf.aviso, dpf.evidencias);
+  }
   if (numero(config.temperaturaMotorMax)) {
     const quentes = separar(
       amostras.filter(
@@ -227,7 +246,8 @@ function analisar({
         ? 'dados_insuficientes'
         : 'em_dia';
   return {
-    versao: '1.0',
+    versao: '1.1',
+    dpf,
     status,
     achados,
     proximas,

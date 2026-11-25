@@ -107,7 +107,7 @@ export default function AssistenteManutencao() {
     executar(async () => {
       const dados = {
         ...Object.fromEntries(
-          ['temperaturaMotorMax', 'tensaoMinima'].map((k) => [
+          ['temperaturaMotorMax', 'tensaoMinima', ...(Object.hasOwn(config, 'dpfObservarPct') || Object.hasOwn(config, 'dpfInspecaoPct') ? ['dpfObservarPct', 'dpfInspecaoPct'] : [])].map((k) => [
             k,
             config[k] === '' || config[k] == null ? null : Number(config[k]),
           ])
@@ -264,6 +264,12 @@ export default function AssistenteManutencao() {
               />
               <small>Opcional: conforme o sistema elétrico, entre 1 e 60 V.</small>
             </label>
+            {['dpfObservarPct', 'dpfInspecaoPct'].map((campo, i) => <label key={campo}>
+              {i ? 'Fuligem DPF: referência de inspeção (%)' : 'Fuligem DPF: referência de observação (%)'}
+              <input type="number" min="0" max="100" step="any" disabled={ocupado} value={config[campo] ?? ''}
+                onChange={e => setConfig(c => ({ ...c, [campo]: e.target.value }))} />
+              <small>Opcional: conforme o fabricante deste veículo. Preencha as duas referências ou deixe ambas vazias.</small>
+            </label>)}
             <label>
               <input
                 type="checkbox"
@@ -292,6 +298,11 @@ export default function AssistenteManutencao() {
             {nomes[resultado.status] || resultado.status}
             {resultado.simulado ? ' · SIMULAÇÃO' : ''}
           </h3>
+          {resultado.dpf && <details><summary>Condição do filtro de partículas (DPF)</summary>
+            <p>{({ sem_dados: 'Sem dados DPF recebidos', referencias_pendentes: 'Referências do fabricante pendentes', sem_indicio_nos_criterios: 'Sem indício nos critérios avaliados', observar: 'Observar', inspecao_recomendada: 'Inspeção recomendada', dados_antigos: 'Leitura DPF há mais de 24 horas' })[resultado.dpf.estado]}</p>
+            {resultado.dpf.dataHora && <p>Leitura em {new Date(resultado.dpf.dataHora).toLocaleString('pt-BR')}</p>}
+            <p>{resultado.dpf.motivos.join(' ')}</p><p>{resultado.dpf.aviso}</p>
+          </details>}
           <p>
             Análise em {new Date(analise.createdAt).toLocaleString('pt-BR')}. {resultado.quantidade}{' '}
             leituras técnicas. Execute outra análise ou reabra o veículo para consultar a última

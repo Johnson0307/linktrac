@@ -42,6 +42,8 @@ app.use((req, res, next) => {
 });
 app.use(require('./middlewares/auditoriaMiddleware').auditar);
 app.use('/api/parceiros/v1', require('./routes/parceiroRoutes'));
+// O app valida a credencial própria e o escopo atual da empresa em cada chamada.
+app.use('/api/motorista-app', require('./routes/motoristaAppRoutes'));
 app.use('/api', require('./middlewares/acessosMiddleware').controlarAcessos);
 
 // Rotas da API
@@ -68,6 +70,7 @@ require('./operacao/automacoes').iniciarWorker();
 require('./operacao/agenteMonitor').iniciarMonitor();
 require('./operacao/receptorTraccar').iniciarReceptorTraccar();
 require('./services/cadastroFinanceiro').iniciarCobranca();
+require('./services/pushMotorista').iniciarWorker();
 
 // Iniciar servidor
 app.listen(PORT, () => {

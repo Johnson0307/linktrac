@@ -3,6 +3,7 @@ const intervalos = {
   temperaturaMotor: [-50, 250], temperaturaCarga: [-100, 200], tensaoBateria: [0, 60],
   horimetroHoras: [0, 1000000], bateriaEquipamentoPct: [0, 100],
   aceleracaoMss: [-30, 30], curvaMss: [-30, 30],
+  dpfFuligemPct: [0, 100], dpfRegeneracoesInterrompidas: [0, 1000000],
 };
 const tiposCamera = ['fadiga', 'distracao', 'celular', 'cinto', 'colisao'];
 const validarTelemetria = (raw) => {
@@ -14,7 +15,7 @@ const validarTelemetria = (raw) => {
     if (typeof raw[key] !== 'number' || !Number.isFinite(raw[key]) || raw[key] < min || raw[key] > max) erros.push(`Telemetria inválida: ${key}.`);
     else dados[key] = raw[key];
   }
-  for (const key of ['portaAberta', 'passageiroPresente', 'alimentacaoExterna']) {
+  for (const key of ['portaAberta', 'passageiroPresente', 'alimentacaoExterna', 'dpfLuz']) {
     if (raw[key] === undefined || raw[key] === null) continue;
     if (typeof raw[key] !== 'boolean') erros.push(`Telemetria inválida: ${key}.`); else dados[key] = raw[key];
   }
@@ -32,6 +33,10 @@ const validarTelemetria = (raw) => {
   }
   if (raw.rede !== undefined) {
     if (!['celular', 'satelite', 'offline'].includes(raw.rede)) erros.push('Tipo de rede inválido.'); else dados.rede = raw.rede;
+  }
+  if (raw.dpfRegeneracao !== undefined) {
+    if (!['inativa', 'em_andamento', 'concluida', 'interrompida'].includes(raw.dpfRegeneracao)) erros.push('Estado de regeneração do DPF inválido.');
+    else dados.dpfRegeneracao = raw.dpfRegeneracao;
   }
   if (raw.eventosDirecao !== undefined) {
     if (!Array.isArray(raw.eventosDirecao) || raw.eventosDirecao.length > 10 || raw.eventosDirecao.some((v) => !['frenagem', 'aceleracao', 'curva'].includes(v))) erros.push('Evento de direção inválido.');

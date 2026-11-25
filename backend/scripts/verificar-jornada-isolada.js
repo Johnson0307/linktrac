@@ -10,6 +10,7 @@ const express = require('express');
 const net = require('node:net');
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 async function main() {
+  const fetchOriginal = globalThis.fetch;
   const reserva = net.createServer(); reserva.listen(0, '127.0.0.1');
   await new Promise(r => reserva.once('listening', r));
   const porta = reserva.address().port; await new Promise(r => reserva.close(r));
@@ -40,6 +41,7 @@ async function main() {
     const Usuario = require('../src/models/Usuario');
     const { Notificacao } = require('../src/operacao/modelos');
     const ponto = require('../src/services/lembretePonto');
+    const push = require('../src/services/pushMotorista');
     const oid = () => new mongoose.Types.ObjectId();
     const a = oid(), b = oid(), veiculo = { _id: oid(), clienteId: a, placa: 'TESTE01' };
     process.env.LINKTRAC_CLIENT_ID = String(oid());
@@ -61,6 +63,7 @@ async function main() {
       if (u) req.user = { id: u._id, clienteId: u.clienteId, role: u.role, email: u.email };
       next();
     });
+    app.use('/api/motorista-app', require('../src/routes/motoristaAppRoutes'));
     app.use('/api', require('../src/middlewares/acessosMiddleware').controlarAcessos);
     app.use('/api/jornada', require('../src/routes/jornadaRoutes'));
     servidor = app.listen(0, '127.0.0.1'); await new Promise(r => servidor.once('listening', r));
@@ -103,6 +106,53 @@ async function main() {
     await receber({}); checar((await pedir('/meus-lembretes', users[0])).dados.length === 0, 'Dispensa persiste sem repetição');
     await receber({ fonte: 'simulado' }); await receber({ dataHora: new Date(Date.now() - 600000) });
     checar(await Notificacao.countDocuments() === 2, 'Simulação e atraso não criam lembretes');
+    const pedirApp = async (caminho, { user, token, body } = {}) => {
+      const res = await fetchOriginal(`http://127.0.0.1:${servidor.address().port}/api/motorista-app${caminho}`, {
+        method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json',
+          ...(user ? { 'x-test-user': String(user._id) } : {}), ...(token ? { Authorization: 'Motorista ' + token } : {}) },
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      }); return { status: res.status, ...await res.json() };
+    };
+    const instalacao = randomUUID();
+    const registroApp = await pedirApp('/registrar', { user: users[0], body: { instalacao, plataforma: 'android', pushAtivo: false } });
+    checar(registroApp.status === 200, 'App registra acesso próprio sem reutilizar JWT');
+    const appToken = registroApp.dados.token;
+    checar((await pedirApp('/status', { token: appToken })).dados.pushAtivo === false, 'Push inicia desativado');
+    checar((await pedirApp('/status', { token: 'f'.repeat(64) })).status === 401, 'Credencial fictícia não acessa dados');
+    process.env.INTEGRACOES_CHAVE_CRIPTOGRAFIA = '1'.repeat(64);
+    process.env.PUSH_MOTORISTA_HABILITADO = '1';
+    process.env.PUSH_MOTORISTA_EXPO_PROJECT_ID = randomUUID();
+    process.env.PUSH_MOTORISTA_EXPO_ACCESS_TOKEN = 'credencial-ficticia-do-autoteste';
+    const pushToken = 'ExpoPushToken[destino_ficticio_de_teste]';
+    const configPush = { ativo: true, consentimento: true, projectId: process.env.PUSH_MOTORISTA_EXPO_PROJECT_ID, pushToken };
+    checar((await pedirApp('/notificacoes', { token: appToken, body: { ...configPush, consentimento: false } })).status === 400, 'Push exige aceite do motorista');
+    checar((await pedirApp('/notificacoes', { token: appToken, body: configPush })).status === 200, 'App autoriza canal com projeto correto');
+    const aparelho = await push.Aparelho.findOne({ usuarioId: users[0]._id }).select('+pushProtegido +credencialHash').lean();
+    checar(aparelho.credencialHash !== appToken && !aparelho.pushProtegido.includes(pushToken), 'Credencial em hash e destino protegido');
+    const outroRegistro = await pedirApp('/registrar', { user: users[2], body: { instalacao: randomUUID(), plataforma: 'ios', pushAtivo: false } });
+    checar((await pedirApp('/notificacoes', { token: outroRegistro.dados.token, body: configPush })).status === 409, 'Outra conta não toma o canal de push já vinculado');
+    await receber({ ignicao: false }); await receber({});
+    let envios = 0;
+    globalThis.fetch = async (url, options) => {
+      if (!String(url).startsWith('https://exp.host/--/api/v2/push/')) return fetchOriginal(url, options);
+      const body = JSON.parse(options.body);
+      if (String(url).endsWith('/send')) {
+        envios++;
+        checar(body.every(m => m.data.tipo === 'lembrete_ponto' && Object.keys(m.data).length === 1 && !JSON.stringify(m).includes('TESTE01')), 'Provedor recebe aviso genérico sem placa e localização');
+        return { ok: true, json: async () => ({ data: body.map(() => ({ status: 'ok', id: randomUUID() })) }) };
+      }
+      return { ok: true, json: async () => ({ data: Object.fromEntries(body.ids.map(id => [id, { status: 'ok' }])) }) };
+    };
+    await push.prepararFila(); await push.prepararFila(); await push.enviarFila();
+    checar(envios === 1 && await push.Entrega.countDocuments({ estado: 'recibo' }) === 1, 'Fila deduplicada envia apenas aviso do ciclo atual');
+    await push.Entrega.updateMany({ estado: 'recibo' }, { $set: { tentarEm: new Date(0) } });
+    await push.conferirRecibos();
+    checar(await push.Entrega.countDocuments({ estado: 'aceito_provedor' }) === 1, 'Recibo é aceite do provedor, sem afirmar entrega ao celular');
+    await Usuario.updateOne({ _id: users[0]._id }, { $set: { ativo: false } });
+    checar((await pedirApp('/status', { token: appToken })).status === 401, 'Desativação do usuário bloqueia acesso persistente');
+    checar((await pedirApp('/desconectar', { token: appToken, body: {} })).status === 200, 'Desconexão continua permitida após revogação');
+    checar((await pedirApp('/status', { token: appToken })).status === 401, 'Celular desconectado não acessa a conta');
+    await Usuario.updateOne({ _id: users[0]._id }, { $set: { ativo: true } });
     await Cliente.updateOne({ _id: a }, { $set: { acessos: { operacao: 'bloqueado' } } });
     checar((await pedir('/meus-lembretes', users[0])).status === 403, 'Revogação do módulo é respeitada');
     const outroVeiculo = { ...veiculo, _id: oid(), placa: 'TESTE02' };
@@ -114,6 +164,7 @@ async function main() {
     checar(await Notificacao.countDocuments({ veiculoId: outroVeiculo._id }) === 1, 'Primeira leitura concorrente cria somente um aviso');
     console.log(`JORNADA_ISOLADA_OK: ${verificacoes} verificações; somente cadastros sintéticos e banco local descartável.`);
   } finally {
+    globalThis.fetch = fetchOriginal;
     if (servidor) await new Promise(r => servidor.close(r));
     if (conexaoInicial) await conexaoInicial.close();
     if (mongoose.connection.readyState === 1) await mongoose.connection.dropDatabase();
