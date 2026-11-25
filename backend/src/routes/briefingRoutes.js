@@ -45,7 +45,9 @@ router.post('/receber', (req, res, next) => {
 router.use(authenticate, central);
 router.post('/edicoes-disponiveis', tratar(async (req, res) => {
   const edicoes = require('../data/briefings-propostas-ate-2026-11-23.json');
-  const novas = await registrarEdicoes(req.user.clienteId, edicoes, req.user.email);
+  const datas = await Edicao.distinct('data', { clienteId: req.user.clienteId });
+  const pendentes = edicoes.filter(e => !datas.includes(e.data));
+  const novas = await registrarEdicoes(req.user.clienteId, pendentes, req.user.email);
   return res.status(novas ? 201 : 200).json({ sucesso: true, novas, repetidas: edicoes.length - novas,
     aviso: 'Propostas importadas para revisão. Importar não implementa nem publica funções automaticamente.' });
 }));
